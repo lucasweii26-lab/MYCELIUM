@@ -147,7 +147,7 @@
 
     portalFrames.innerHTML = sorted.map((ev, i) => {
       const label = pick(ev, "short") || pick(ev, "title") || "Moment";
-      const coverUrl = ev.cover || "./img/gallery/meditation.png";
+      const coverUrl = ev.cover || "/img/gallery/meditation.png";
       const dateText = formatLightDate(ev.date);
 
       return `
