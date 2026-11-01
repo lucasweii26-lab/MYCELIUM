@@ -1,0 +1,23 @@
+{
+  "name": "mycelium-smart-community",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test scripts/*.test.js",
+    "export:locale": "node scripts/export-en-locale.mjs",
+    "translate:locales": "node scripts/translate-locales.mjs",
+    "translate:firestore": "node scripts/translate-firestore-content.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "three": "^0.186.1"
+  }
+}

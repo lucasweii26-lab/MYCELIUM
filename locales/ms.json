@@ -1,0 +1,535 @@
+{
+  "nav": {
+    "announcement": "PENGUMUMAN",
+    "facilities": "FASILITI",
+    "services": "DIRECTORI PERKHIDMATAN KEMUDAHAN",
+    "events": "ACARA",
+    "volunteer": "PENDAFTARAN SUKARELAWAN",
+    "faq": "SOALAN LAZIM",
+    "searchPlaceholder": "Cari ....."
+  },
+  "common": {
+    "close": "Tutup",
+    "submit": "Hantar",
+    "backToTop": "Kembali ke Atas",
+    "readMore": "Baca Lagi",
+    "all": "Semua",
+    "searchNoResult": "Tiada bahagian sepadan ditemui, sila cuba kata kunci lain"
+  },
+  "announcement": {
+    "title": "Pengumuman Komuniti",
+    "subtitle": "Ikuti perkembangan terkini dan notis dari komuniti anda",
+    "tabAll": "Semua",
+    "tabEmergency": "Kecemasan",
+    "tabMaintenance": "Penyelenggaraan",
+    "tabCommunity": "Komuniti",
+    "tabEvents": "Acara"
+  },
+  "map": {
+    "title": "Peta Fasiliti Komuniti",
+    "hint": "Klik pada pin untuk melihat butiran fasiliti"
+  },
+  "calendar": {
+    "title": "Kalendar Acara Komuniti",
+    "hint": "Klik pada tarikh yang diserlahkan untuk melihat acara komuniti yang akan datang",
+    "prev": "‹",
+    "next": "›"
+  },
+  "service": {
+    "title": "Direktori Perkhidmatan Tempatan",
+    "phone": "Telefon",
+    "email": "E-mel"
+  },
+  "volunteer": {
+    "kicker": "Sertai",
+    "title": "Pendaftaran Sukarelawan",
+    "subtitle": "Sertai pasukan sukarelawan kami dan bawa impak positif kepada komuniti",
+    "registerNow": "Daftar Sekarang",
+    "formTitle": "Daftar sebagai Sukarelawan",
+    "close": "Tutup",
+    "fullName": "Nama Penuh",
+    "phone": "Nombor Telefon",
+    "address": "Alamat Rumah",
+    "namePlaceholder": "John Doe",
+    "addressPlaceholder": "Elton St 21 22-145",
+    "notesPlaceholder": "cth. sekatan pemakanan, keperluan aksesibiliti",
+    "activityLabel": "Aktiviti:",
+    "notes": "Keperluan / Catatan (pilihan)",
+    "submitBtn": "Hantar Pendaftaran",
+    "submitting": "Menghantar...",
+    "requiredTip": "Sila isi nama, nombor telefon dan pilih aktiviti.",
+    "successTip": "Terima kasih! Pendaftaran anda telah dihantar. Kami akan menghubungi anda tidak lama lagi.",
+    "errorTip": "Penghantaran gagal, sila semak rangkaian anda dan cuba lagi.",
+    "card1": {
+      "title": "Hari Penanaman Pokok",
+      "date": "1 Ogos 2026 · 8:00 PG · Taman Komuniti",
+      "desc": "Bantu mencantikkan kawasan kejiranan kami dan memupuk kesedaran alam sekitar dengan menanam pokok di sekitar komuniti.",
+      "bring": "Apa yang perlu dibawa: Sarung tangan berkebun, penyodok kecil, botol air boleh guna semula",
+      "btn": "Daftar Sekarang"
+    },
+    "card2": {
+      "title": "Hari Gotong-royong Kejiranan",
+      "date": "9 Ogos 2026 · 9:00 PG · Tempat Letak Kereta Pelawat",
+      "desc": "Sertai aktiviti berjalan dan membersihkan kawasan sekitar kolam dan taman untuk membantu memastikan komuniti kita bersih dan hijau.",
+      "bring": "Apa yang perlu dibawa: Sarung tangan, pelitup muka, penyepit (beg sampah disediakan)",
+      "btn": "Daftar Sekarang"
+    },
+    "card3": {
+      "title": "Marshal Larian Ceria",
+      "date": "22 Ogos 2026 · 7:00 PG · Taman Komuniti",
+      "desc": "Bantu pelari di sepanjang laluan sebagai marshal, menunjukkan arah dan menghidangkan minuman.",
+      "bring": "Apa yang perlu dibawa: Kasut selesa, topi, botol air boleh guna semula",
+      "btn": "Daftar Sekarang"
+    }
+  },
+  "faq": {
+    "title": "Soalan Lazim"
+  },
+  "chatbot": {
+    "open": "Chat",
+    "title": "Pembantu Komuniti",
+    "placeholder": "Masukkan mesej...",
+    "send": "Hantar",
+    "welcome": "Hai di sana. Bagaimana saya boleh membantu anda hari ini?",
+    "thinking": "Sedang berfikir...",
+    "report": "Laporkan",
+    "error": "Maaf, saya kurang faham. Anda boleh cuba bertanya tentang acara, fasiliti, perkhidmatan atau pendaftaran sukarelawan.",
+    "thankFeedback": "Terima kasih atas maklum balas anda",
+    "quickReply": {
+      "announcement": "Pengumuman",
+      "facilities": "Fasiliti",
+      "services": "Perkhidmatan",
+      "events": "Acara",
+      "volunteer": "Sukarelawan",
+      "faq": "Soalan Lazim"
+    },
+    "replies": {
+      "announcement": "Pengumuman Komuniti Terkini:\n\n• 30 Jul - Amaran hujan lebat (2 ptg-8 mlm)\n• 24 Ogos - Gangguan bekalan air (9 pg-4 ptg)\n• 15 Ogos - Mesyuarat komuniti tahunan\n\nBuka halaman Pengumuman untuk melihat semua kategori dan butiran penuh.",
+      "greeting": "Helo! Bagaimana saya boleh membantu anda hari ini? Anda boleh bertanya kepada saya tentang acara, fasiliti, perkhidmatan, pendaftaran sukarelawan atau Soalan Lazim.",
+      "events": "Acara Komuniti Akan Datang:\n\n• 1 Ogos - Hari Penanaman Pokok\n• 9 Ogos - Hari Gotong-royong Kejiranan\n• 22 Ogos - Larian Ceria\n\nBuka halaman Kalendar Acara untuk melihat butiran penuh dan maklumat pendaftaran.",
+      "volunteer": "Anda boleh mendaftar di halaman Pendaftaran Sukarelawan. Kami kini mempunyai 3 aktiviti: Hari Penanaman Pokok, Gotong-royong Kejiranan, dan Marshal Larian Ceria. Klik 'JADI SUKARELAWAN' pada slaid sukarelawan untuk mengisi borang.",
+      "facilities": "Buka Peta Fasiliti Interaktif untuk melihat semua kemudahan. Ia menandakan 11 lokasi termasuk gimnasium, kolam renang, taman permainan dan rumah kelab. Anda juga boleh mencari fasiliti tertentu di bar carian atas.",
+      "faq": "Lawati bahagian Soalan Lazim untuk jawapan mengenai keahlian, tempahan fasiliti, peraturan komuniti dan laporan penyelenggaraan. Anda juga boleh menggunakan bar carian untuk mencari kandungan dengan cepat.",
+      "services": "Direktori Perkhidmatan Tempatan mempunyai senarai hubungan untuk 8 jenis perkhidmatan tempatan yang dipercayai termasuk tukang paip, juruelektrik dan juruteknik penghawa dingin. Buka direktori untuk melihat nombor telefon dan e-mel.",
+      "thank": "Sama-sama! Jangan ragu untuk bertanya jika anda mempunyai sebarang soalan lain.",
+      "contact": "Anda boleh menghubungi pejabat pengurusan komuniti di +60 10-557 0900 atau emel myceliumresidence07@gmail.com. Waktu pejabat adalah 9 pagi hingga 6 petang pada hari bekerja."
+    }
+  },
+  "report": {
+    "title": "Hantar Maklum Balas",
+    "name": "Nama",
+    "surname": "Nama Keluarga",
+    "contactNumber": "Nombor Perhubungan",
+    "email": "Alamat E-mel",
+    "address": "Alamat Anda",
+    "message": "Tulis Mesej Anda",
+    "subscribe": "Saya ingin menerima kemas kini mengenai kempen.",
+    "submit": "Hantar",
+    "successAlert": "Terima kasih atas maklum balas anda! Kami telah menerima laporan anda dan akan membalas dalam masa 48 jam.",
+    "errorAlert": "Maaf, ralat berlaku semasa menghantar maklum balas anda. Sila cuba lagi atau e-mel kami secara terus.",
+    "submitting": "Sedang menghantar..."
+  },
+  "slider": {
+    "announcement": {
+      "title": "PENGUMUMAN",
+      "desc": "Ikuti perkembangan terkini dan Notis daripada komuniti anda",
+      "btn": "BACA NOTIS"
+    },
+    "facilities": {
+      "title": "KEMUDAHAN",
+      "desc": "Terokai kemudahan komuniti, termasuk gimnasium, taman permainan, kolam renang dan banyak lagi",
+      "btn": "LIHAT PETA"
+    },
+    "services": {
+      "title": "DIREKTORI PERKHIDMATAN TEMPATAN",
+      "desc": "Cari perkhidmatan tempatan yang dipercayai seperti tukang paip, juruelektrik, pembersih dan juruteknik",
+      "btn": "CARI KONTAK"
+    },
+    "events": {
+      "title": "ACARA",
+      "desc": "Temui acara komuniti, aktiviti dan sambutan yang akan datang berhampiran anda",
+      "btn": "LIHAT KALENDAR"
+    },
+    "volunteer": {
+      "title": "PENDAFTARAN SUKARELAWAN",
+      "desc": "Sertai pasukan sukarelawan kami dan bawa impak positif kepada komuniti",
+      "btn": "JADI SUKARELAWAN"
+    },
+    "faq": {
+      "title": "SOALAN LAZIM",
+      "desc": "Dapatkan jawapan pantas untuk soalan lazim mengenai perkhidmatan dan kemudahan komuniti",
+      "btn": "BACA SOALAN LAZIM"
+    }
+  },
+  "mapPins": {
+    "tennis": {
+      "name": "Gelanggang tenis",
+      "desc": "Gelanggang tenis berhampiran pintu masuk utama, di sebelah barisan rumah menghadap hadapan."
+    },
+    "clubhouse": {
+      "name": "Rumah Kelab",
+      "desc": "Bangunan komuniti utama, bersebelahan dek kolam dan halaman terbuka berhampiran pusat kejiranan."
+    },
+    "pool": {
+      "name": "Kolam utama",
+      "desc": "Kolam pusat komuniti dengan dek pelantar matahari, kerusi rehat dan payung, betul-betul di sebelah rumah kelab."
+    },
+    "playground": {
+      "name": "Taman permainan",
+      "desc": "Kawasan permainan berasaskan pasir dengan alat gelongsor, terletak di belakang rumah kelab."
+    },
+    "park": {
+      "name": "Taman komuniti",
+      "desc": "Halaman hijau terbuka dengan laluan berjalan kaki melingkar, di sebelah timur hartanah."
+    },
+    "parking": {
+      "name": "Tempat letak kereta tetamu",
+      "desc": "Lot tempat letak kereta bergaris untuk penduduk dan pelawat, di selatan rumah kelab."
+    },
+    "basketball": {
+      "name": "Gelanggang bola keranjang",
+      "desc": "Gelanggang bola keranjang berhampiran rumah sudut barat daya."
+    },
+    "gym": {
+      "name": "Gimnasium",
+      "desc": "Rumah bumbung kelabu di sebelah gelanggang bola keranjang, digunakan sebagai gim komuniti."
+    },
+    "pond": {
+      "name": "Kolam",
+      "desc": "Kolam semula jadi di sepanjang sempadan tenggara komuniti, dikelilingi pokok."
+    },
+    "recycle1": {
+      "name": "Pusat kitar semula",
+      "desc": "Pusat kitar semula berhampiran tempat letak kereta tetamu."
+    },
+    "recycle2": {
+      "name": "Pusat kitar semula",
+      "desc": "Pusat kitar semula berhampiran barisan bawah rumah."
+    }
+  },
+  "features": {
+    "tooltip": "KLIK UNTUK BACA LAGI",
+    "smart": {
+      "title": "KEMUDAHAN PINTAR",
+      "desc": "Akses kemudahan dan perkhidmatan moden yang direka untuk meningkatkan kehidupan harian komuniti.",
+      "modal": {
+        "title": "Kemudahan Pintar",
+        "items": {
+          "digitalPayments": "Pembayaran Digital",
+          "facilityBooking": "Tempahan Kemudahan",
+          "procurement": "Perolehan",
+          "eform": "Borang Eletronik"
+        }
+      }
+    },
+    "safety": {
+      "title": "KESELAMATAN KOMUNITI",
+      "desc": "Mewujudkan kejiranan yang lebih selamat dan saling berhubung.",
+      "modal": {
+        "title": "Keselamatan Komuniti",
+        "items": {
+          "contractManagement": "Pengurusan Kontrak",
+          "visitorManagement": "Pengurusan Pelawat",
+          "videoAnalytics": "Analitis Video",
+          "virtualPatrol": "Rondaan Maya"
+        }
+      }
+    },
+    "green": {
+      "title": "HIDUP HIJAU",
+      "desc": "Mempromosikan persekitaran yang bersih, sihat dan mampan.",
+      "modal": {
+        "title": "Hidup Hijau",
+        "items": {
+          "smartIrrigation": "Pengairan Pintar",
+          "wasteManagement": "Pengurusan Sisa",
+          "evCharging": "Pengecasan EV",
+          "energyEfficiency": "Kecekapan Tenaga"
+        }
+      }
+    },
+    "connect": {
+      "title": "BERHUBUNG DENGAN KAMI",
+      "desc": "Kongsi idea, maklum balas dan terus berhubung dengan komuniti.",
+      "tooltip": "KLIK UNTUK MENGHUBUNGI"
+    }
+  },
+  "footer": {
+    "tagline": "MEMPERKASAKAN KESIHATAN\nMEMPERKAYA KEHIDUPAN",
+    "desc": "Membina komuniti yang lebih pintar, hijau dan bersatu padu untuk semua penduduk.",
+    "quickLinks": "Pautan Pantas",
+    "linkAnnouncement": "Pengumuman",
+    "linkMap": "Peta Kemudahan",
+    "linkService": "Direktori Perkhidmatan",
+    "linkEvent": "Kalendar Acara",
+    "linkVolunteer": "Sukarelawan",
+    "linkFaq": "Soalan Lazim",
+    "contactTitle": "Hubungi Kami",
+    "contactAddr": "📍 Pejabat Pengurusan, Aras 1 Rumah Kelab",
+    "contactPhone": "📞 +6010-5570900",
+    "contactEmail": "✉ myceliumresidence07@gmail.com",
+    "contactHour": "🕘 Isn – Jumaat: 9.00 PG – 6.00 PTG",
+    "newsletterTitle": "Surat Berita",
+    "newsletterDesc": "Langgan untuk kemas kini komuniti mingguan dan Notis acara.",
+    "newsletterBtn": "Langgan",
+    "newsletterPlaceholder": "Masukkan alamat e-mel anda",
+    "copyright": "© 2026 MYCELIUM Smart Community. Hak cipta terpelihara.",
+    "privacy": "Dasar Privasi",
+    "terms": "Terma Perkhidmatan",
+    "rules": "Peraturan Komuniti"
+  },
+  "searchKeywords": [
+    {
+      "keywords": [
+        "pengumuman",
+        "notis",
+        "berita",
+        "kemas kini",
+        "kecemasan",
+        "penyelenggaraan",
+        "hujan",
+        "bekalan air"
+      ],
+      "action": "announcement",
+      "slideIndex": 0
+    },
+    {
+      "keywords": [
+        "kemudahan",
+        "kemudahan",
+        "peta",
+        "gim",
+        "kolam",
+        "renang",
+        "taman permainan",
+        "taman",
+        "tenis",
+        "bola keranjang",
+        "rumah kelab",
+        "parkir",
+        "kolam ikan",
+        "kitar semula",
+        "pelan tapak"
+      ],
+      "action": "map",
+      "slideIndex": 1
+    },
+    {
+      "keywords": [
+        "perkhidmatan",
+        "direktori",
+        "tukang paip",
+        "tukang elektrik",
+        "pencuci",
+        "pembaikan",
+        "penyaman udara",
+        "tukang kayu",
+        "pelukis",
+        "tukang kebun",
+        "doktor",
+        "hubungi"
+      ],
+      "action": "service",
+      "slideIndex": 2
+    },
+    {
+      "keywords": [
+        "acara",
+        "kalendar",
+        "aktiviti",
+        "menanam pokok",
+        "gotong-royong",
+        "lari ceria",
+        "sambutan",
+        "julai",
+        "ogos"
+      ],
+      "action": "calendar",
+      "slideIndex": 3
+    },
+    {
+      "keywords": [
+        "sukarelawan",
+        "daftar",
+        "serta",
+        "daftar masuk",
+        "bantuan",
+        "marshal"
+      ],
+      "action": "volunteer",
+      "slideIndex": 4
+    },
+    {
+      "keywords": [
+        "soalan lazim",
+        "soalan",
+        "jawapan",
+        "bagaimana",
+        "peraturan",
+        "keahlian",
+        "laporan",
+        "isu",
+        "keselamatan",
+        "waktu tenang",
+        "haiwan peliharaan",
+        "parkir",
+        "surat berita"
+      ],
+      "action": "faq",
+      "slideIndex": 5
+    }
+  ],
+  "heroIntro": {
+    "titleLine1": "Kehidupan pintar,",
+    "titleLine2": "berakar di alam semula jadi.",
+    "description": "Sebuah komuniti kediaman berpagar yang dibina untuk kesejahteraan, keselamatan, dan hubungan.",
+    "explore": "TEROKA KOMUNITI",
+    "chooseLocation": "PILIH LOKASI ANDA"
+  },
+  "newsletter": {
+    "invalidEmail": "Sila masukkan alamat emel yang sah.",
+    "submitting": "Menghantar...",
+    "success": "Langganan berjaya! Terima kasih kerana melanggan.",
+    "failure": "Langganan gagal, sila cuba lagi nanti."
+  },
+  "gallery": {
+    "kicker": "Galeri",
+    "title": "Momen yang wajar dikenang",
+    "sub": "Jalur filem momen komuniti — tatal setiap bingkai.",
+    "enter": "Masuk Galeri",
+    "entering": "Sedang masuk…",
+    "close": "Tutup cerita",
+    "newer": "Lebih baharu",
+    "older": "Lebih lama",
+    "when": "Bila",
+    "where": "Di mana",
+    "host": "Dianjurkan oleh",
+    "people": "Disertai oleh",
+    "photo": "Slot foto",
+    "by": "Meja Komuniti MYCELIUM",
+    "explore": "Teroka",
+    "back": "Kembali",
+    "empty": "Tiada momen lagi",
+    "date": "Tarikh",
+    "place": "Tempat"
+  },
+  "liveNews": {
+    "kicker": "Berita langsung",
+    "title": "Berita tempatan, secara langsung",
+    "sub": "Tonton saluran berita untuk wilayah anda tanpa meninggalkan laman web komuniti.",
+    "play": "Mainkan siaran langsung",
+    "resume": "Sambung semula siaran langsung",
+    "loadsOnPlay": "Video hanya dimuatkan apabila anda menekan butang main.",
+    "paused": "Dijeda untuk menjimatkan data semasa anda tiada.",
+    "note": "Jika video dipaparkan sebagai tidak tersedia, saluran tersebut berada di antara siaran atau telah menyahdayakan pengebenaman.",
+    "open": "Buka di YouTube",
+    "channels": "Saluran berita",
+    "credit": "Video disediakan oleh YouTube and pemilik saluran.",
+    "live": "Langsung",
+    "offline": "Tidak langsung",
+    "readNews": "Tidak dimainkan? Baca berita terkini",
+    "notLiveTitle": "Tidak bersiaran langsung buat masa ini",
+    "notLiveBody": "{name} tidak menstrim buat masa ini. Buka halaman berita terkini sebagai ganti?",
+    "openNews": "Buka berita terkini",
+    "tryAnyway": "Cuba pemain juga",
+    "stay": "Kekal di sini"
+  },
+  "airQuality": {
+    "kicker": "Kualiti udara",
+    "title": "Kualiti udara hari ini",
+    "sub": "Anggaran US AQI untuk kawasan komuniti anda, dikemas kini sepanjang hari.",
+    "loading": "Memuatkan kualiti udara…",
+    "error": "Data kualiti udara tidak tersedia buat masa ini.",
+    "retry": "Cuba lagi",
+    "aqi": "US AQI",
+    "updated": "Dikemas kini",
+    "trend": "24 jam lalu dan 12 jam seterusnya",
+    "now": "Sekarang",
+    "pollutants": "Pencemar utama",
+    "official": "Bacaan rasmi",
+    "source": "Anggaran dimodelkan daripada data Copernicus Atmosphere Monitoring Service melalui Open-Meteo. Ini bukan bacaan stesen pemantauan rasmi.",
+    "good": "Baik",
+    "moderate": "Sederhana",
+    "sensitive": "Tidak sihat untuk kumpulan sensitif",
+    "unhealthy": "Tidak sihat",
+    "veryUnhealthy": "Sangat tidak sihat",
+    "hazardous": "Berbahaya",
+    "adviceGood": "Kualiti udara memuaskan. Masa yang baik untuk berada di luar.",
+    "adviceModerate": "Boleh diterima untuk kebanyakan orang. Individu yang sangat sensitif mungkin ingin kurangkan aktiviti di luar.",
+    "adviceSensitive": "Kanak-kanak, warga emas serta individu yang mempunyai masalah jantung atau paru-paru harus mengehadkan aktiviti luar yang lama.",
+    "adviceUnhealthy": "Semua orang harus mengurangkan aktiviti luar yang berpanjangan. Kumpulan sensitif harus kekal di dalam rumah jika boleh.",
+    "adviceVeryUnhealthy": "Elakkan aktiviti luar jika mampu. Pastikan tingkap ditutup.",
+    "adviceHazardous": "Kekal di dalam rumah dengan tingkap tertutup dan ikuti panduan pihak berkuasa tempatan."
+  },
+  "featureDetails": {
+    "smartFacilitiesModal": [
+      "Bayar caj komuniti dan yuran kemudahan melalui aliran digital yang jelas dan mudah. Penduduk boleh menyemak baki tanggungan dan menyimpan rekod pembayaran yang telah selesai.",
+      "Semak ketersediaan dan tempah ruang bersama seperti gimnasium, kolam renang atau dewan komuniti. Kalendar tempahan membantu penduduk merancang awal dan mengelakkan tempahan bertindih.",
+      "Serahkan permintaan untuk bekalan bersama atau kerja penyelenggaraan dan ikuti setiap permintaan dari penyerahan hingga selesai, membantu pihak pengurusan mengekalkan ketelusan.",
+      "Hantar borang seperti permintaan penyelenggaraan dan permohonan penduduk secara online, kemudian terima pengesahan yang jelas supaya kurang penggunaan kertas dan panggilan susulan."
+    ],
+    "communitySafetyModal": [
+      "Pastikan perjanjian perkhidmatan, tarikh pembaharuan dan dokumen berkaitan tersusun di satu tempat, supaya penduduk dan pengurusan memahami apa yang telah dipersetujui.",
+      "Daftar tetamu yang dijangka dan maklumkan kepada penduduk apabila pelawat tiba. Langkah daftar masuk yang jelas membantu melancarkan kemasukan sambil mengekalkan sambutan mesra.",
+      "Gunakan sistem kamera kawasan bersama untuk membantu pasukan pengurusan menyemak insiden keselamatan. Pemantauan harus mematuhi peraturan privasi tempatan dan polisi komuniti.",
+      "Selaraskan laluan rondaan dan rekod pemerhatian supaya pasukan boleh bertindak balas secara konsisten terhadap isu di laluan masuk, laluan pejalan kaki dan kemudahan bersama."
+    ],
+    "greenLivingModal": [
+      "Laraskan jadual penyiraman mengikut cuaca dan keperluan tanaman, membantu taman kekal subur sambil mengurangkan pembaziran air.",
+      "Jadikan amalan kitar semula dan pengkomposan lebih mudah difahami dengan panduan pengasingan yang jelas dan pusat pengumpulan di sekitar komuniti.",
+      "Sediakan titik pengecasan untuk kenderaan elektrik dan tunjukkan lokasinya kepada penduduk, menyokong perjalanan rendah pelepasan apabila komuniti berkembang.",
+      "Jejak langkah praktikal seperti pencahayaan cekap dan jadual peralatan untuk mengurangkan pembaziran tenaga di ruang bersama tanpa menjejaskan keselesaan."
+    ],
+    "communityConnectModal": [
+      "Baca notis terkini daripada komuniti pilihan anda, termasuk kemas kini perkhidmatan dan maklumat penting mengikut masa.",
+      "Layari kalendar komuniti untuk aktiviti akan datang, tarikh dan maklumat acara praktikal.",
+      "Cari peluang sukarelawan, baca butiran setiap aktiviti dan daftar untuk menyertai.",
+      "Hubungi pasukan pengurusan tempatan menggunakan maklumat hubungan untuk rantau yang sedang dipilih di laman web ini."
+    ],
+    "ui": {
+      "soon": "Akan datang",
+      "soonNote": "Akan datang — perkhidmatan ini sedang rancang dan belum tersedia.",
+      "openPortal": "Buka di portal penduduk →",
+      "viewCalendar": "Lihat kalendar komuniti →",
+      "exploreVolunteer": "Terokai aktiviti sukarelawan →",
+      "seeContacts": "Lihat kenalan komuniti →",
+      "readNotices": "Baca notis komuniti →",
+      "sendMessage": "Hantar mesej →",
+      "communityFeature": "Ciri komuniti"
+    }
+  },
+  "countryPicker": {
+    "kicker": "LOKASI MYCELIUM",
+    "title": "Pilih komuniti anda.",
+    "selected": "DIPILIH",
+    "active": "Tapak komuniti tersedia",
+    "button": "Teruskan ke Mycelium",
+    "help": "Pilihan lokasi anda disimpan pada peranti ini. Anda boleh mengubahnya pada bila-bila masa.",
+    "close": "Tutup pemilihan lokasi",
+    "heroLabel": "PILIH LOKASI ANDA",
+    "navLabel": "LOKASI MYCELIUM",
+    "globeLoading": [
+      "Memuatkan glob…",
+      "Masih memuatkan — anda sudah boleh memilih lokasi di bawah."
+    ]
+  },
+  "footerActions": {
+    "placeholder": "Emel untuk melanggan, atau tulis mesej anda",
+    "report": "Tulis laporan →",
+    "hint": "Masukkan emel untuk menyertai surat berita. Tulis apa sahaja dan kami akan membuka borang laporan supaya anda boleh menghantarnya kepada pasukan pengurusan."
+  },
+  "legalDocs": {
+    "privacy": {
+      "title": "Dasar Privasi",
+      "content": "\n          <h4>1. Maklumat yang Kami Kumpul</h4>\n          <p>Kami boleh mengumpul maklumat peribadi yang anda berikan secara sukarela, termasuk nama, nombor telefon, alamat e-mel dan alamat rumah apabila anda menghantar maklum balas, mendaftar untuk aktiviti sukarelawan atau menggunakan perkhidmatan komuniti.</p>\n          <h4>2. Cara Kami Menggunakan Maklumat Anda</h4>\n          <ul>\n            <li>Untuk menyediakan dan mengekalkan perkhidmatan serta kemudahan komuniti</li>\n            <li>Untuk menghantar pengumuman penting, pemberitahuan acara dan kemas kini perkhidmatan</li>\n            <li>Untuk membalas pertanyaan dan maklum balas anda</li>\n            <li>Untuk menambah baik pengurusan komuniti dan pengalaman pengguna</li>\n          </ul>\n          <h4>3. Perkongsian Maklumat</h4>\n          <p>Kami tidak menjual, menyewakan atau mendedahkan maklumat peribadi anda kepada pihak ketiga untuk tujuan komersial.</p>\n          <h4>4. Keselamatan Data</h4>\n          <p>Kami mengambil langkah teknikal dan organisasi yang sewajarnya untuk melindungi maklumat peribadi anda.</p>\n          <h4>5. Hak Anda</h4>\n          <p>Anda berhak untuk mengakses, membetulkan atau meminta pemadaman maklumat peribadi anda.</p>\n          <h4>6. Hubungi Kami</h4>\n          <p>Jika anda mempunyai sebarang soalan, sila hubungi myceliumresidence07@gmail.com.</p>\n        "
+    },
+    "terms": {
+      "title": "Terma Perkhidmatan",
+      "content": "\n          <h4>1. Penerimaan Terma</h4>\n          <p>Dengan mengakses dan menggunakan perkhidmatan Komuniti Pintar MYCELIUM, anda bersetuju untuk terikat dengan Terma Perkhidmatan ini.</p>\n          <h4>2. Penerangan Perkhidmatan</h4>\n          <p>Kami menyediakan maklumat komuniti, tempahan kemudahan dan perkhidmatan dalam talian.</p>\n          <h4>3. Tanggungjawab Pengguna</h4>\n          <ul>\n            <li>Mematuhi undang-undang yang terpakai dan peraturan komuniti</li>\n            <li>Memberikan maklumat yang benar dan tepat</li>\n          </ul>\n        "
+    },
+    "rules": {
+      "title": "Peraturan Komuniti",
+      "content": "\n          <h4>1. Adab di Kawasan Awam</h4>\n          <p>Pastikan kawasan awam bersih dan kemas. Jagalah kemudahan awam dengan baik.</p>\n          <h4>2. Waktu Senyap</h4>\n          <p>Waktu senyap ialah dari 10:00 malam hingga 7:00 pagi setiap hari.</p>\n          <h4>3. Pengurusan Haiwan Peliharaan</h4>\n          <p>Haiwan peliharaan mesti diikat dengan tali di kawasan awam.</p>\n        "
+    }
+  }
+}

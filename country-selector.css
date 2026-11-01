@@ -1,0 +1,452 @@
+/* ==========================================================================
+   country-selector.css — MYCELIUM 地区选择器与顶部定位胶囊样式
+   ========================================================================== */
+
+/* 1. 顶部导航栏地区选择按钮 */
+.country-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--line, rgba(24, 61, 50, 0.18));
+  color: var(--ink, #1c2b25);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--corner-pill);
+  transition: border-color 0.25s var(--ease, ease), background 0.25s var(--ease, ease), padding 0.3s ease;
+}
+.country-switcher:hover {
+  border-color: var(--copper, #75503d);
+  background: var(--paper-2, #dce4d5);
+}
+.country-switcher-label {
+  color: var(--ink-soft, #526258);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  line-height: 1;
+}
+.country-switcher-value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.country-switcher-chevron {
+  color: var(--copper, #75503d);
+  font-size: 0.95rem;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+/* 2. Hero 区域跳转位置按钮 */
+.intro-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.intro-location-btn {
+  min-height: 48px;
+  padding: 14px 22px;
+  border: 1px solid rgba(244, 241, 231, 0.72);
+  border-radius: var(--corner-pill);
+  background: transparent;
+  color: var(--paper, #f4f1e7);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s var(--ease, ease), color 0.3s var(--ease, ease), border-color 0.3s var(--ease, ease), transform 0.3s var(--ease, ease);
+}
+.intro-location-btn span {
+  display: inline-block;
+  margin-left: 8px;
+  transition: transform 0.2s var(--ease, ease);
+}
+.intro-location-btn span:first-child { margin-left: 0; }
+.intro-location-btn:hover {
+  border-color: var(--paper, #f4f1e7);
+  background: var(--paper, #f4f1e7);
+  color: var(--pine, #183d32);
+  transform: translateY(-2px);
+}
+.intro-location-btn:hover span {
+  transform: translate(2px, -2px);
+}
+
+/* 3. 弹窗整体容器（支持全屏与非全屏，隔离背景滚动） */
+.country-picker {
+  position: fixed;
+  z-index: 10020;
+  inset: 0;
+  display: grid;
+  /* 地球略宽、右侧决策栏给足阅读宽度（奢侈地产分屏常见 55/45～60/40） */
+  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+  background: var(--pine, #183d32);
+  color: var(--paper, #f4f1e7);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  overscroll-behavior: contain;
+  transition: opacity 0.28s var(--ease, ease), visibility 0.28s var(--ease, ease);
+}
+.country-picker.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+body.country-picker-open {
+  overflow: hidden !important;
+}
+
+/* 4. 左侧 3D 星空地球视窗 */
+.country-picker-scene {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background: #050811;
+}
+.country-picker-scene::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image:
+    linear-gradient(180deg, rgba(3, 7, 18, 0.22), rgba(3, 7, 18, 0.58)),
+    url("./img/Slide/UNIVERSE.webp");
+  background-position: center;
+  background-size: cover;
+}
+.country-globe-canvas {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+  transition: opacity 0.6s var(--ease, ease);
+}
+.country-globe-canvas:active { cursor: grabbing; }
+.country-globe-fallback {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(244, 241, 231, 0.7);
+  font-size: 0.9rem;
+}
+.country-globe-fallback[hidden] { display: none; }
+
+/* 5. 右侧面板：弹性无缝排版，无论非全屏多矮都能直接点击 Continue */
+.country-picker-panel,
+.country-picker-options,
+.country-picker-options-wrap {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.country-picker-panel::-webkit-scrollbar,
+.country-picker-options::-webkit-scrollbar,
+.country-picker-options-wrap::-webkit-scrollbar {
+  display: none !important;
+}
+
+.country-picker-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* 上标题区更松、下 CTA 区更沉稳，避免整栏被 space-between 拉成“挤条” */
+  padding: clamp(36px, 6vh, 64px) clamp(32px, 4.5vw, 56px) clamp(28px, 4vh, 44px);
+  background: var(--pine, #183d32);
+  border-left: 1px solid rgba(244, 241, 231, 0.12);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  gap: clamp(22px, 3.2vh, 36px);
+}
+
+/* 关闭按钮 */
+.country-picker-close {
+  position: absolute;
+  top: clamp(20px, 3vh, 32px);
+  right: clamp(20px, 3vw, 32px);
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(244, 241, 231, 0.2);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--paper, #f4f1e7);
+  font-size: 1.3rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.country-picker-close:hover {
+  background: rgba(244, 241, 231, 0.1);
+  border-color: rgba(244, 241, 231, 0.4);
+  transform: scale(1.05);
+}
+
+/* 标签小字 */
+.country-picker-kicker {
+  margin: 0 0 12px;
+  color: rgba(145, 169, 138, 0.72);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* 情绪锚点主标题 */
+.country-picker-title {
+  margin: 0;
+  font-family: var(--serif, Georgia, serif);
+  font-size: clamp(2.15rem, 3.6vw, 3.35rem);
+  font-weight: 500;
+  line-height: 1.08;
+  color: var(--paper, #f4f1e7);
+  letter-spacing: -0.025em;
+  max-width: 12ch;
+}
+
+.country-picker-header {
+  padding-right: 48px; /* 避开关闭按钮 */
+  margin-bottom: clamp(4px, 1vh, 12px);
+}
+
+/* 城市列表区域：微层级感容器，提示可滚动 */
+.country-picker-options-wrap {
+  position: relative;
+  margin: 0;
+  flex: 0 1 auto;
+}
+.country-picker-options {
+  display: grid;
+  gap: 10px;
+  /* 仅 3 个地点：不再用矮 max-height 把选项压成挤在一起的滚动条 */
+  max-height: none;
+  overflow: visible;
+  overscroll-behavior: contain;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(244, 241, 231, 0.1);
+  border-radius: var(--cr-md); corner-shape: var(--corner-shape);
+}
+
+/* 单个城市选项 */
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 52px;
+  padding: 14px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--cr-sm); corner-shape: var(--corner-shape);
+  background: transparent;
+  color: rgba(244, 241, 231, 0.72);
+  font-family: inherit;
+  font-size: 0.98rem;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+.country-option:hover {
+  color: var(--paper, #f4f1e7);
+  background: rgba(244, 241, 231, 0.04);
+}
+.country-option:focus-visible {
+  outline: 2px solid var(--copper-soft, #91a98a);
+  outline-offset: 2px;
+}
+
+/* 选中态：极简细边框 + 小圆点激活 */
+.country-option.is-selected {
+  background: rgba(244, 241, 231, 0.04);
+  border-color: rgba(244, 241, 231, 0.32);
+  color: var(--paper, #f4f1e7);
+}
+.country-option-marker {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(244, 241, 231, 0.22);
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+.country-option.is-selected .country-option-marker {
+  background: var(--copper-soft, #91a98a);
+  transform: scale(1.25);
+  box-shadow: 0 0 10px rgba(145, 169, 138, 0.45);
+}
+.country-option-name {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+/* SELECTED 区域：与列表拉开，确认态更清晰 */
+.country-picker-selection {
+  padding: clamp(16px, 2.4vh, 22px) 4px;
+  border-top: 1px solid rgba(244, 241, 231, 0.12);
+  border-bottom: 1px solid rgba(244, 241, 231, 0.12);
+  margin: 0;
+}
+.country-picker-selection .country-picker-kicker {
+  margin-bottom: 14px;
+}
+.country-picker-country {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+.country-picker-marker {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--copper-soft, #91a98a);
+  box-shadow: 0 0 0 6px rgba(145, 169, 138, 0.14);
+}
+.country-picker-country-name {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 500;
+  color: var(--paper, #f4f1e7);
+  line-height: 1.3;
+}
+.country-picker-country-meta {
+  margin: 6px 0 0;
+  color: rgba(244, 241, 231, 0.48);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+/* Continue：贴底留白，与上方内容拉开（margin-top: auto） */
+.country-picker-continue {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 24px;
+  border: 1px solid var(--paper, #f4f1e7);
+  border-radius: var(--corner-pill);
+  background: var(--paper, #f4f1e7);
+  color: var(--pine, #183d32);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: auto;
+  margin-bottom: 0;
+  transition: background-color 0.25s var(--ease, ease), color 0.25s var(--ease, ease), transform 0.25s var(--ease, ease);
+}
+.country-picker-continue:hover {
+  background: transparent;
+  color: var(--paper, #f4f1e7);
+  transform: translateY(-1px);
+}
+.country-picker-continue:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 底部备注 */
+.country-picker-help {
+  margin: 4px 0 0;
+  color: rgba(244, 241, 231, 0.42);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  max-width: 36ch;
+}
+
+/* 6. 轻量 Toast 提示 */
+.country-location-toast {
+  position: fixed;
+  z-index: 10030;
+  left: 50%;
+  bottom: 24px;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 12px 20px;
+  border-radius: var(--corner-pill);
+  background: var(--pine, #183d32);
+  color: var(--paper, #f4f1e7);
+  border: 1px solid rgba(244, 241, 231, 0.2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
+  font-size: 0.84rem;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.country-location-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* 针对矮视口（非全屏笔记本）的自适应紧凑规则 */
+@media (max-height: 720px) {
+  .country-picker-panel {
+    padding: 28px 28px 20px;
+    gap: 16px;
+  }
+  .country-picker-title {
+    font-size: 1.9rem;
+  }
+  .country-option {
+    min-height: 46px;
+    padding: 10px 14px;
+  }
+  .country-picker-options {
+    gap: 8px;
+    padding: 10px;
+  }
+  .country-picker-selection {
+    padding: 12px 4px;
+  }
+  .country-picker-continue {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 900px) {
+  .country-switcher-label { display: none; }
+  .country-picker {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 36vh) 1fr;
+    overflow-y: auto;
+  }
+  .country-picker-scene { min-height: 220px; }
+  .country-picker-panel {
+    padding: 28px 22px max(28px, env(safe-area-inset-bottom));
+    border-left: 0;
+    border-top: 1px solid rgba(244, 241, 231, 0.12);
+    gap: 20px;
+  }
+  .country-picker-title {
+    max-width: none;
+    font-size: clamp(1.9rem, 7vw, 2.6rem);
+  }
+  .country-picker-continue {
+    margin-top: 8px;
+  }
+}

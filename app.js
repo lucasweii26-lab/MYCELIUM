@@ -1,0 +1,3559 @@
+// ==========================================================================
+// app.js — MYCELIUM 智慧社区前端主逻辑
+// ==========================================================================
+
+// 全局通用品牌优雅弹窗（替代原生 alert）
+function showMyceliumNotice(message, title) {
+  const modal = document.getElementById("myceliumNoticeModal");
+  if (!modal) {
+    window.alert(message);
+    return;
+  }
+  const titleEl = document.getElementById("myceliumNoticeTitle");
+  const msgEl = document.getElementById("myceliumNoticeMsg");
+  const btn = document.getElementById("myceliumNoticeConfirmBtn");
+  
+  const noticeT = (key, fallback) => (typeof window.t === "function" ? window.t(key) : fallback);
+  if (titleEl) titleEl.textContent = title || noticeT("ui.thankYou", "Thank You");
+  if (btn) btn.textContent = noticeT("ui.confirm", "Confirm");
+  if (msgEl) msgEl.textContent = message;
+  
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+  
+  const close = () => {
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+    btn.removeEventListener("click", close);
+  };
+  btn.addEventListener("click", close, { once: true });
+}
+window.showMyceliumNotice = showMyceliumNotice;
+
+// 背景音效初始化
+(function initBgWhiteNoise() {
+  const audio = document.getElementById('bgWhiteNoise');
+  if (!audio) return;
+
+  audio.volume = 0.3; 
+  audio.loop = true;
+  audio.preload = 'auto';
+
+  let hasPlaySuccess = false; 
+
+  function tryPlay() {
+    if (hasPlaySuccess) return;
+    const playPromise = audio.play();
+    if (!playPromise) return;
+
+    playPromise.then(() => {
+      hasPlaySuccess = true;
+      audio.muted = false;
+      localStorage.setItem('bgNoiseAutoplayAllowed', 'true');
+      removeAllListeners();
+    }).catch(() => {});
+  }
+
+  function handleUserInteract() {
+    if (hasPlaySuccess) return;
+    audio.muted = false;
+    tryPlay();
+  }
+
+  const eventTypes = [
+    'click', 'mousedown', 'touchstart', 'pointerdown',
+    'keydown', 'scroll', 'wheel', 'input', 'change', 'pointerup'
+  ];
+
+  function removeAllListeners() {
+    eventTypes.forEach(evt => {
+      document.removeEventListener(evt, handleUserInteract, { passive: true });
+    });
+  }
+
+  eventTypes.forEach(evt => {
+    document.addEventListener(evt, handleUserInteract, { passive: true });
+  });
+
+  if (localStorage.getItem('bgNoiseAutoplayAllowed') === 'true') {
+    tryPlay();
+  } else {
+    audio.muted = true;
+    audio.play().catch(() => {});
+  }
+})();
+
+const DEFAULT_LANG = 'en';
+const STORAGE_KEY = 'preferredLang';
+
+// 提前声明全局语言并挂载至 window，确保依赖此变量的外部脚本零报错
+let currentLang = DEFAULT_LANG;
+window.currentLang = currentLang;
+
+const LANG_LABELS = {
+  'en': 'English',
+  'es': 'Español',
+  'zh-CN': '简体中文',
+  'ms': 'Bahasa Melayu',
+  'ta': 'தமிழ்'
+};
+
+const i18n = {
+  en: {
+    nav: {
+      announcement: 'ANNOUNCEMENT',
+      facilities: 'FACILITIES',
+      services: 'LOCAL SERVICE DIRECTORY',
+      events: 'EVENTS',
+      volunteer: 'VOLUNTEER REGISTRATION',
+      faq: 'FAQ',
+      searchPlaceholder: 'Search .....'
+    },
+    common: {
+      close: 'Close',
+      submit: 'Submit',
+      backToTop: 'Back to Top',
+      readMore: 'Read More',
+      all: 'All',
+      searchNoResult: 'No matching section found, please try another keyword'
+    },
+    announcement: {
+      title: 'Community Announcements',
+      subtitle: 'Stay informed with the latest news and notices from your community',
+      tabAll: 'All',
+      tabEmergency: 'Emergency',
+      tabMaintenance: 'Maintenance',
+      tabCommunity: 'Community',
+      tabEvents: 'Events'
+    },
+    map: {
+      title: 'Community Facilities Map',
+      hint: 'Click a pin to view facility details'
+    },
+    calendar: {
+      title: 'Community Events Calendar',
+      hint: 'Click a highlighted date to see the upcoming community event',
+      prev: '‹',
+      next: '›'
+    },
+    service: {
+      title: 'Local Service Directory',
+      phone: 'Phone',
+      email: 'Email'
+    },
+    volunteer: {
+      kicker: 'Participate',
+      title: 'Volunteer Registration',
+      subtitle: 'Join our volunteer team and make a positive impact in the community',
+      registerNow: 'Register Now',
+      formTitle: 'Register as a Volunteer',
+      close: 'Close',
+      fullName: 'Full Name',
+      phone: 'Phone Number',
+      address: 'House Address',
+      namePlaceholder: 'John Doe',
+      addressPlaceholder: 'Elton St 21 22-145',
+      notesPlaceholder: 'e.g. dietary restrictions, accessibility needs',
+      activityLabel: 'Activity:',
+      notes: 'Requirements / Notes (optional)',
+      submitBtn: 'Submit Registration',
+      submitting: 'Submitting...',
+      requiredTip: 'Please fill in your name, phone number and select an activity.',
+      successTip: 'Thank you! Your registration has been submitted. We\'ll contact you soon.',
+      errorTip: 'Submission failed, please check your network and try again.',
+      card1: {
+        title: 'Tree Planting Day',
+        date: '1 August 2026 · 8:00 AM · Community Park',
+        desc: 'Help beautify our neighbourhood and promote environmental awareness by planting trees around the community.',
+        bring: 'What to bring: Gardening gloves, a small shovel, a reusable water bottle',
+        btn: 'Register Now'
+      },
+      card2: {
+        title: 'Neighborhood Cleanup Day',
+        date: '9 August 2026 · 9:00 AM · Guest Parking Lot',
+        desc: 'Join a walk-and-clean around the pond and park to help keep our community tidy and green.',
+        bring: 'What to bring: Gloves, face mask, tongs (garbage bags provided)',
+        btn: 'Register Now'
+      },
+      card3: {
+        title: 'Fun Run Marshal',
+        date: '22 August 2026 · 7:00 AM · Community Park',
+        desc: 'Support runners along the route as a marshal, guiding directions and handing out refreshments.',
+        bring: 'What to bring: Comfortable shoes, cap, reusable water bottle',
+        btn: 'Register Now'
+      }
+    },
+    faq: {
+      title: 'Frequently Asked Questions'
+    },
+    chatbot: {
+      open: 'Chat',
+      title: 'Community Assistant',
+      placeholder: 'Enter a message...',
+      send: 'Send',
+      welcome: 'Hi there. How can I help you today?',
+      thinking: 'Thinking...',
+      report: 'Report',
+      error: "Sorry, I don't quite understand that. You can try asking about events, facilities, services or volunteer registration.",
+      thankFeedback: 'Thank you for your feedback',
+      quickReply: {
+        announcement: 'Announcements',
+        facilities: 'Facilities',
+        services: 'Services',
+        events: 'Events',
+        volunteer: 'Volunteer',
+        faq: 'FAQ'
+      },
+      replies: {
+        announcement: "Latest Community Announcements:\n\n• 30 July - Heavy rain warning (2pm-8pm)\n• 24 Aug - Water supply interruption (9am-4pm)\n• 15 Aug - Annual community meeting\n\nOpen the Announcements page to view all categories and full details.",
+        greeting: "Hello! How can I help you today? You can ask me about events, facilities, services, volunteer registration or FAQs.",
+        events: "Upcoming Community Events:\n\n• 1 Aug - Tree Planting Day\n• 9 Aug - Neighbourhood Cleanup Day\n• 22 Aug - Fun Run\n\nOpen the Event Calendar page to view full details and registration info.",
+        volunteer: "You can sign up on the Volunteer Registration page. We currently have 3 activities: Tree Planting Day, Neighborhood Cleanup, and Fun Run Marshal. Click 'VOLUNTEER NOW' on the volunteer slide to fill in the form.",
+        facilities: "Open the Interactive Facilities Map to view all amenities. It marks 11 locations including the gym, swimming pool, playground and clubhouse. You can also search for specific facilities in the top search bar.",
+        faq: "Visit the FAQ section for answers about membership, facility booking, community rules and maintenance reports. You can also use the search bar to find content quickly.",
+        services: "The Local Service Directory has contacts for 8 types of trusted local services including plumbers, electricians and air-condition technicians. Open the directory to view phone numbers and emails.",
+        thank: "You're welcome! Feel free to ask if you have any other questions.",
+        contact: "You can reach the community management office at +60 10-557 0900 or email myceliumresidence07@gmail.com. Office hours are 9am-6pm on weekdays."
+      }
+    },
+    report: {
+      title: 'Submit Feedback',
+      name: 'Name',
+      surname: 'Surname',
+      contactNumber: 'Contact Number',
+      email: 'Email Address',
+      address: 'Your Address',
+      message: 'Write Your Message',
+      subscribe: 'I would like to receive updates on campaigns.',
+      submit: 'Submit',
+      successAlert: 'Thank you for your feedback! We have received your report and will respond within 48 hours.',
+      errorAlert: 'Sorry, there was an error submitting your feedback. Please try again or email us directly.',
+      submitting: 'Submitting...'
+    },
+    slider: {
+      announcement: {
+        title: 'ANNOUNCEMENT',
+        desc: 'Stay informed with the latest news and notices from your community',
+        btn: 'READ NOTICE'
+      },
+      facilities: {
+        title: 'FACILITIES',
+        desc: 'Explore community facilities, including the gym, playground, swimming pool and more',
+        btn: 'VIEW MAP'
+      },
+      services: {
+        title: 'LOCAL SERVICE DIRECTORY',
+        desc: 'Find trusted local services such as plumbers, electricians, cleaners and technicians',
+        btn: 'FIND CONTACT'
+      },
+      events: {
+        title: 'EVENTS',
+        desc: 'Discover upcoming community events, activities and celebrations happening near you',
+        btn: 'VIEW CALENDAR'
+      },
+      volunteer: {
+        title: 'VOLUNTEER REGISTRATION',
+        desc: 'Join our volunteer team and make a positive impact in the community',
+        btn: 'VOLUNTEER NOW'
+      },
+      faq: {
+        title: 'FAQ',
+        desc: 'Find quick answers to frequently asked questions about community services and facilities',
+        btn: 'READ FAQ'
+      }
+    },
+    mapPins: {
+      tennis: { name: 'Tennis court', desc: 'A tennis court near the front entrance, beside the row of front-facing homes.' },
+      clubhouse: { name: 'Clubhouse', desc: 'The main community building, adjoining the pool deck and open lawn near the center of the neighborhood.' },
+      pool: { name: 'Main pool', desc: 'The community\'s central pool with a sun deck, loungers, and umbrellas, right next to the clubhouse.' },
+      playground: { name: 'Playground', desc: 'A sand-based play area with slide equipment, just behind the clubhouse.' },
+      park: { name: 'Community park', desc: 'An open green lawn with a looping walking path, on the east side of the property.' },
+      parking: { name: 'Guest parking', desc: 'A striped parking lot for residents and visitors, just south of the clubhouse.' },
+      basketball: { name: 'Basketball court', desc: 'A basketball court near the southwest corner homes.' },
+      gym: { name: 'Gym', desc: 'The grey-roofed house beside the basketball court, used as the community gym.' },
+      pond: { name: 'Pond', desc: 'A natural pond along the southeast edge of the community, bordered by trees.' },
+      recycle1: { name: 'Recycling point', desc: 'Recycling point near guest parking.' },
+      recycle2: { name: 'Recycling point', desc: 'Recycling point near the bottom row of homes.' }
+    },
+    features: {
+      tooltip: "CLICK TO READ MORE",
+      smart: {
+        title: "SMART FACILITIES",
+        desc: "Access modern facilities and services designed to improve daily community life.",
+        modal: {
+          title: "Smart Facilities",
+          items: {
+            digitalPayments: "Digital Payments",
+            facilityBooking: "Facility Booking",
+            procurement: "Procurement",
+            eform: "eForm"
+          }
+        }
+      },
+      safety: {
+        title: "COMMUNITY SAFETY",
+        desc: "Creating a safer and more connected neighborhood.",
+        modal: {
+          title: "Community Safety",
+          items: {
+            contractManagement: "Contract Management",
+            visitorManagement: "Visitor Management",
+            videoAnalytics: "Video Analytics",
+            virtualPatrol: "Virtual Patrol"
+          }
+        }
+      },
+      green: {
+        title: "GREEN LIVING",
+        desc: "Promoting a clean, healthy and sustainable environment.",
+        modal: {
+          title: "Green Living",
+          items: {
+            smartIrrigation: "Smart Irrigation",
+            wasteManagement: "Waste Management",
+            evCharging: "EV Charging",
+            energyEfficiency: "Energy Efficiency"
+          }
+        }
+      },
+      connect: {
+        title: "CONNECT WITH US",
+        desc: "Share ideas, feedback and stay connected with the community.",
+        tooltip: "CLICK TO CONTACT"
+      }
+    },
+    footer: {
+      tagline: 'EMPOWERING HEALTH\nENRICHING LIVES',
+      desc: 'Building a smarter, greener and more connected community for all residents.',
+      quickLinks: 'Quick Links',
+      linkAnnouncement: 'Announcements',
+      linkMap: 'Facilities Map',
+      linkService: 'Service Directory',
+      linkEvent: 'Events Calendar',
+      linkVolunteer: 'Volunteer',
+      linkFaq: 'FAQ',
+      contactTitle: 'Contact Us',
+      contactAddr: '📍 Management Office, Clubhouse Level 1',
+      contactPhone: '📞 +6010-5570900',
+      contactEmail: '✉ myceliumresidence07@gmail.com',
+      contactHour: '🕘 Mon – Fri: 9.00 AM – 6.00 PM',
+      newsletterTitle: 'Newsletter',
+      newsletterDesc: 'Subscribe for weekly community updates and event notices.',
+      newsletterBtn: 'Subscribe',
+      newsletterPlaceholder: 'Enter your email address',
+      copyright: '© 2026 MYCELIUM Smart Community. All rights reserved.',
+      privacy: 'Privacy Policy',
+      terms: 'Terms of Service',
+      rules: 'Community Rules'
+    },
+    legalDocs: {
+      privacy: {
+        title: "Privacy Policy",
+        content: `
+          <h4>1. Information We Collect</h4>
+          <p>We may collect personal information you voluntarily provide, including your name, contact number, email address, and house address when you submit feedback, register for volunteer activities, or use community services.</p>
+          <h4>2. How We Use Your Information</h4>
+          <ul>
+            <li>To provide and maintain community services and facilities</li>
+            <li>To send important announcements, event notifications and service updates</li>
+            <li>To respond to your inquiries and feedback</li>
+            <li>To improve community management and user experience</li>
+          </ul>
+          <h4>3. Information Sharing</h4>
+          <p>We do not sell, rent or disclose your personal information to third parties for commercial purposes.</p>
+          <h4>4. Data Security</h4>
+          <p>We adopt appropriate technical and organizational measures to protect your personal information.</p>
+          <h4>5. Your Rights</h4>
+          <p>You have the right to access, correct or request deletion of your personal information.</p>
+          <h4>6. Contact Us</h4>
+          <p>If you have any questions, please contact myceliumresidence07@gmail.com.</p>
+        `
+      },
+      terms: {
+        title: "Terms of Service",
+        content: `
+          <h4>1. Acceptance of Terms</h4>
+          <p>By accessing and using the MYCELIUM Smart Community services, you agree to be bound by these Terms of Service.</p>
+          <h4>2. Service Description</h4>
+          <p>We provide community information, facility booking, and online services.</p>
+          <h4>3. User Obligations</h4>
+          <ul>
+            <li>Comply with applicable laws and community regulations</li>
+            <li>Provide true and accurate information</li>
+          </ul>
+        `
+      },
+      rules: {
+        title: "Community Rules",
+        content: `
+          <h4>1. Public Area Etiquette</h4>
+          <p>Keep public areas clean and tidy. Take good care of public facilities.</p>
+          <h4>2. Quiet Hours</h4>
+          <p>Quiet hours are from 10:00 PM to 7:00 AM daily.</p>
+          <h4>3. Pet Management</h4>
+          <p>Pets must be kept on a leash in public areas.</p>
+        `
+      }
+    },
+    searchKeywords: [
+      { keywords: ["announcement", "announcements", "news", "notice", "update", "emergency", "maintenance", "rain", "water supply"], action: "announcement", slideIndex: 0 },
+      { keywords: ["facility", "facilities", "map", "gym", "pool", "swimming", "playground", "park", "tennis", "basketball", "clubhouse", "parking", "pond", "recycling", "site plan"], action: "map", slideIndex: 1 },
+      { keywords: ["service", "directory", "plumber", "electrician", "cleaner", "repair", "air cond", "carpenter", "painter", "landscaper", "doctor", "contact"], action: "service", slideIndex: 2 },
+      { keywords: ["event", "calendar", "activity", "tree planting", "cleanup", "fun run", "celebration", "july", "august"], action: "calendar", slideIndex: 3 },
+      { keywords: ["volunteer", "register", "join", "sign up", "help", "marshal"], action: "volunteer", slideIndex: 4 },
+      { keywords: ["faq", "question", "answer", "how to", "rule", "membership", "report", "issue", "safety", "quiet hours", "pet", "parking", "newsletter"], action: "faq", slideIndex: 5 }
+    ]
+  },
+
+  'zh-CN': {
+    nav: {
+      announcement: '社区公告',
+      facilities: '设施地图',
+      services: '本地服务目录',
+      events: '活动日历',
+      volunteer: '志愿者报名',
+      faq: '常见问题',
+      searchPlaceholder: '搜索内容...'
+    },
+    common: {
+      close: '关闭',
+      submit: '提交',
+      backToTop: '回到顶部',
+      readMore: '查看详情',
+      all: '全部',
+      searchNoResult: '未找到匹配内容，请尝试其他关键词'
+    },
+    announcement: {
+      title: '社区公告',
+      subtitle: '获取社区最新新闻、通知及重要公告资讯',
+      tabAll: '全部',
+      tabEmergency: '紧急通知',
+      tabMaintenance: '维修维护',
+      tabCommunity: '社区活动',
+      tabEvents: '活动预告'
+    },
+    map: {
+      title: '社区设施地图',
+      hint: '点击标记查看设施详情'
+    },
+    calendar: {
+      title: '社区活动日历',
+      hint: '点击浅色标记的日期查看活动详情',
+      prev: '‹',
+      next: '›'
+    },
+    service: {
+      title: '本地服务目录',
+      phone: '联系电话',
+      email: '电子邮箱'
+    },
+    volunteer: {
+      kicker: '参与',
+      title: '志愿者报名',
+      subtitle: '加入我们的志愿者团队，为社区带来积极影响',
+      registerNow: '立即报名',
+      formTitle: '志愿者报名表',
+      close: '关闭',
+      fullName: '姓名',
+      phone: '联系电话',
+      address: '居住地址',
+      notes: '备注信息（选填）',
+      submitBtn: '提交报名',
+      submitting: '提交中...',
+      requiredTip: '请填写姓名、电话并选择活动。',
+      successTip: '感谢报名！我们会尽快与您联系。',
+      errorTip: '提交失败，请检查网络后重试。',
+      card1: {
+        title: '植树日',
+        date: '2026年8月1日 · 上午8:00 · 社区公园',
+        desc: '一起在社区内种植树木，美化社区环境，提升环保意识。',
+        bring: '需携带：园艺手套、小铲子、可重复使用水杯',
+        btn: '立即报名'
+      },
+      card2: {
+        title: '社区清洁日',
+        date: '2026年8月9日 · 上午9:00 · 访客停车场',
+        desc: '环绕池塘与公园进行步行清洁，共同维护社区整洁与绿色环境。',
+        bring: '需携带：手套、口罩、垃圾夹（垃圾袋统一提供）',
+        btn: '立即报名'
+      },
+      card3: {
+        title: '欢乐跑志愿者',
+        date: '2026年8月22日 · 上午7:00 · 社区公园',
+        desc: '作为路线志愿者为跑者提供指引、补给发放等支持。',
+        bring: '需携带：舒适鞋子、帽子、可重复使用水杯',
+        btn: '立即报名'
+      }
+    },
+    faq: {
+      title: '常见问题'
+    },
+    chatbot: {
+      open: '聊天',
+      title: '社区助手',
+      placeholder: '请输入您的问题...',
+      send: '发送',
+      welcome: '您好，请问有什么可以帮您？',
+      thinking: '思考中...',
+      report: '反馈',
+      error: '抱歉，我不太理解您的问题。您可以尝试询问活动、设施、服务或志愿者报名相关内容。',
+      thankFeedback: '感谢您的反馈',
+      quickReply: {
+        announcement: '社区公告',
+        facilities: '社区设施',
+        services: '本地服务',
+        events: '社区活动',
+        volunteer: '志愿者',
+        faq: '常见问题'
+      },
+      replies: {
+        announcement: "最新社区公告：\n\n• 7月30日 - 暴雨预警（下午2点-8点）\n• 8月24日 - 供水暂停（上午9点-下午4点）\n• 8月15日 - 年度居民大会\n\n打开「社区公告」页面可查看全部分类和完整详情。",
+        greeting: "您好！我可以为您解答社区活动、设施、本地服务、志愿者报名、常见问题等相关问题。",
+        events: "近期社区活动：\n\n• 8月1日 - 植树节活动\n• 8月9日 - 社区清洁日\n• 8月22日 - 欢乐跑活动\n\n打开「活动日历」页面可查看完整详情和报名信息。",
+        volunteer: "您可以在志愿者报名页面完成登记。目前开放3个活动岗位：植树节、社区清洁日、欢乐跑工作人员。点击志愿者板块的「立即报名」即可填写表单。",
+        facilities: "打开「设施地图」可查看全部公共设施位置，包含健身房、游泳池、儿童游乐场、社区会所等11个点位，也可通过顶部搜索栏查找特定设施。",
+        faq: "常见问题板块包含会员权益、设施预约、社区守则、报修流程等解答，也可以通过顶部搜索栏快速查找对应内容。",
+        services: "本地服务目录收录了水管工、电工、空调维修、木工、保洁等8类可信服务商联系方式，打开目录可查看完整电话和邮箱。",
+        thank: "不客气！如有其他问题随时问我。",
+        contact: "您可以通过 +60 10-557 0900 或 myceliumresidence07@gmail.com 联系社区管理处，办公时间为工作日上午9点至下午6点。"
+      }
+    },
+    report: {
+      title: '提交反馈',
+      name: '名字',
+      surname: '姓氏',
+      contactNumber: '联系电话',
+      email: '电子邮箱',
+      address: '居住地址',
+      message: '留言内容',
+      subscribe: '我希望接收活动最新资讯',
+      submit: '提交',
+      successAlert: '感谢您的反馈！我们已收到您的报告，将在48小时内回复。',
+      errorAlert: '抱歉，提交反馈时出错了。请重试或直接发送邮件给我们。',
+      submitting: '正在提交…'
+    },
+    slider: {
+      announcement: { title: '社区公告', desc: '获取社区最新新闻、通知及重要公告', btn: '阅读公告' },
+      facilities: { title: '社区设施', desc: '探索社区设施，包括健身房、游乐场、游泳池等', btn: '查看地图' },
+      services: { title: '本地服务目录', desc: '寻找值得信赖的本地服务，例如水管工、电工、清洁人员及技术人员', btn: '查找联系方式' },
+      events: { title: '社区活动', desc: '了解您附近即将举行的社区活动、庆典及各类精彩活动', btn: '查看日历' },
+      volunteer: { title: '志愿者报名', desc: '加入我们的志愿者团队，为社区带来积极影响', btn: '成为志愿者' },
+      faq: { title: '常见问题', desc: '快速查找有关社区服务及设施的常见问题解答', btn: '阅读常见问题' }
+    },
+    mapPins: {
+      tennis: { name: '网球场', desc: '位于社区入口附近，紧邻前排住宅的标准网球场。' },
+      clubhouse: { name: '社区会所', desc: '社区核心建筑，毗邻泳池平台与开放草坪，位于社区中心位置。' },
+      pool: { name: '主游泳池', desc: '社区中心泳池，配备日光浴平台、躺椅与遮阳伞，紧邻会所。' },
+      playground: { name: '儿童游乐场', desc: '沙质地面游乐区，配备滑梯等设施，位于会所正后方。' },
+      park: { name: '社区公园', desc: '开阔的绿色草坪与环形步道，位于社区东侧。' },
+      parking: { name: '访客停车场', desc: '划线标准停车场，供居民与访客使用，位于会所南侧。' },
+      basketball: { name: '篮球场', desc: '位于西南角住宅附近的标准篮球场。' },
+      gym: { name: '健身房', desc: '篮球场旁的灰色屋顶建筑，用作社区健身中心。' },
+      pond: { name: '景观池塘', desc: '社区东南侧的自然景观池塘，周边绿树环绕。' },
+      recycle1: { name: '垃圾分类点', desc: '访客停车场附近的垃圾分类回收点。' },
+      recycle2: { name: '垃圾分类点', desc: '后排住宅附近的垃圾分类回收点。' }
+    },
+    features: {
+      tooltip: "点击了解更多",
+      smart: { title: "智能设施", desc: "体验现代化社区设施与服务，提升日常社区生活品质。" },
+      safety: { title: "社区安全", desc: "打造更安全、更紧密的社区环境。" },
+      green: { title: "绿色生活", desc: "倡导清洁、健康及可持续发展的生活环境。" },
+      connect: { title: "联系我们", desc: "分享您的想法、意见反馈，并与社区保持联系。", tooltip: "点击联系我们" }
+    },
+    footer: {
+      tagline: '赋能健康 丰富生活',
+      desc: '为所有居民打造更加智能、绿色且紧密相连的社区。',
+      quickLinks: '快速链接',
+      linkAnnouncement: '社区公告',
+      linkMap: '设施地图',
+      linkService: '服务目录',
+      linkEvent: '活动日历',
+      linkVolunteer: '志愿者',
+      linkFaq: '常见问题',
+      contactTitle: '联系我们',
+      contactAddr: '📍 管理办公室，会所一楼',
+      contactPhone: '📞 +6010-5570900',
+      contactEmail: '✉ myceliumresidence07@gmail.com',
+      contactHour: '🕘 周一至周五：上午 9:00 – 下午 6:00',
+      newsletterTitle: '社区通讯',
+      newsletterDesc: '订阅每周社区最新动态及活动通知。',
+      newsletterBtn: '订阅',
+      newsletterPlaceholder: '输入您的电子邮箱地址',
+      copyright: '© 2026 MYCELIUM 智慧社区。版权所有。',
+      privacy: '隐私政策',
+      terms: '服务条款',
+      rules: '社区守则'
+    }
+  },
+
+  ms: {
+    nav: {
+      announcement: 'PENGUMUMAN',
+      facilities: 'KEMUDAHAN',
+      services: 'DIREKTORI PERKHIDMATAN',
+      events: 'ACARA',
+      volunteer: 'PENDAFTARAN SUKARELAWAN',
+      faq: 'SOALAN LAZIM',
+      searchPlaceholder: 'Cari .....'
+    },
+    common: {
+      close: 'Tutup',
+      submit: 'Hantar',
+      backToTop: 'Kembali ke Atas',
+      readMore: 'Baca Lagi',
+      all: 'Semua',
+      searchNoResult: 'Tiada padanan ditemui, sila cuba kata kunci lain'
+    },
+    announcement: {
+      title: 'Pengumuman Komuniti',
+      subtitle: 'Ikuti berita dan notis terkini daripada komuniti anda',
+      tabAll: 'Semua',
+      tabEmergency: 'Kecemasan',
+      tabMaintenance: 'Penyelenggaraan',
+      tabCommunity: 'Komuniti',
+      tabEvents: 'Acara'
+    },
+    map: {
+      title: 'Peta Kemudahan Komuniti',
+      hint: 'Klik pin untuk melihat butiran kemudahan'
+    },
+    calendar: {
+      title: 'Kalendar Acara Komuniti',
+      hint: 'Klik tarikh yang ditanda warna untuk melihat butiran acara',
+      prev: '‹',
+      next: '›'
+    },
+    service: {
+      title: 'Direktori Perkhidmatan Tempatan',
+      phone: 'Telefon',
+      email: 'E-mel'
+    },
+    volunteer: {
+      kicker: 'Sertai',
+      title: 'Pendaftaran Sukarelawan',
+      subtitle: 'Sertai pasukan sukarelawan kami dan berikan impak positif kepada komuniti',
+      registerNow: 'Daftar Sekarang',
+      formTitle: 'Borang Pendaftaran Sukarelawan',
+      close: 'Tutup',
+      fullName: 'Nama Penuh',
+      phone: 'No. Telefon',
+      address: 'Alamat Rumah',
+      notes: 'Catatan / Keperluan (pilihan)',
+      submitBtn: 'Hantar Pendaftaran',
+      submitting: 'Menghantar...',
+      requiredTip: 'Sila isi nama, telefon dan pilih aktiviti.',
+      successTip: 'Terima kasih! Pendaftaran anda telah dihantar. Kami akan menghubungi anda tidak lama lagi.',
+      errorTip: 'Penghantaran gagal, sila semak rangkaian dan cuba lagi.',
+      card1: {
+        title: 'Hari Menanam Pokok',
+        date: '1 Ogos 2026 · 8:00 PG · Taman Komuniti',
+        desc: 'Bantu mempercantik kejiranan dan meningkatkan kesedaran alam sekitar dengan menanam pokok di seluruh komuniti.',
+        bring: 'Perlu dibawa: Sarung tangan berkebun, penyodok kecil, botol air boleh guna semula',
+        btn: 'Daftar Sekarang'
+      },
+      card2: {
+        title: 'Hari Pembersihan Komuniti',
+        date: '9 Ogos 2026 · 9:00 PG · Tempat Letak Kereta Tetamu',
+        desc: 'Sertai aktiviti bersih sambil berjalan mengelilingi kolam dan taman untuk memastikan komuniti kita bersih dan hijau.',
+        bring: 'Perlu dibawa: Sarung tangan, pelitup muka, penyepit sampah (beg sampah disediakan)',
+        btn: 'Daftar Sekarang'
+      },
+      card3: {
+        title: 'Maraton Fun Run',
+        date: '22 Ogos 2026 · 7:00 PG · Taman Komuniti',
+        desc: 'Bantu pelari sepanjang laluan sebagai marshal, membimbing arah dan mengagihkan minuman.',
+        bring: 'Perlu dibawa: Kasut selesa, topi, botol air boleh guna semula',
+        btn: 'Daftar Sekarang'
+      }
+    },
+    faq: { title: 'Soalan Lazim' },
+    chatbot: {
+      open: 'Bual',
+      title: 'Pembantu Komuniti',
+      placeholder: 'Taip mesej anda...',
+      send: 'Hantar',
+      welcome: 'Hai, apa yang boleh saya bantu hari ini?',
+      thinking: 'Fikir...',
+      report: 'Maklum Balas',
+      error: 'Maaf, saya tidak begitu faham. Anda boleh cuba tanya tentang acara, kemudahan, perkhidmatan atau pendaftaran sukarelawan.',
+      thankFeedback: 'Terima kasih atas maklum balas anda'
+    },
+    report: {
+      title: 'Hantar Maklum Balas',
+      name: 'Nama Pertama',
+      surname: 'Nama Keluarga',
+      contactNumber: 'No. Telefon',
+      email: 'Alamat E-mel',
+      address: 'Alamat Rumah',
+      message: 'Tulis Mesej Anda',
+      subscribe: 'Saya ingin menerima kemas kini tentang kempen',
+      submit: 'Hantar',
+      successAlert: 'Terima kasih atas maklum balas anda! Kami telah menerima laporan anda dan akan menjawab dalam masa 48 jam.',
+      errorAlert: 'Maaf, terdapat ralat semasa menghantar maklum balas anda.',
+      submitting: 'Sedang menghantar...'
+    },
+    footer: {
+      tagline: 'MEMPERKASA KESIHATAN MEMPERKAYA KEHIDUPAN',
+      desc: 'Membina komuniti yang lebih pintar, hijau dan saling berhubung untuk semua penduduk.',
+      quickLinks: 'Pautan Pantas',
+      contactTitle: 'Hubungi Kami',
+      newsletterTitle: 'Buletin',
+      newsletterBtn: 'Langgan',
+      newsletterPlaceholder: 'Masukkan alamat e-mel anda',
+      copyright: '© 2026 Komuniti Pintar MYCELIUM. Hak cipta terpelihara.'
+    }
+  },
+
+  ta: {
+    nav: {
+      announcement: 'அறிவிப்பு',
+      facilities: 'வசதிகள்',
+      services: 'உள்ளூர் சேவை அடைவு',
+      events: 'நிகழ்வுகள்',
+      volunteer: 'தொண்டு பதிவு',
+      faq: 'அடிக்கடி கேட்கப்படும் கேள்விகள்',
+      searchPlaceholder: 'தேடு .....'
+    },
+    common: {
+      close: 'மூடு',
+      submit: 'சமர்ப்பிக்கவும்',
+      backToTop: 'மேலே செல்',
+      readMore: 'மேலும் வாசிக்க',
+      all: 'அனைத்தும்',
+      searchNoResult: 'பொருத்தமான பிரிவு கிடைக்கவில்லை, வேறு சொல்லை முயற்சிக்கவும்'
+    },
+    announcement: {
+      title: 'சமூக அறிவிப்புகள்',
+      subtitle: 'உங்கள் சமூகத்தின் சமீபத்திய செய்திகள் மற்றும் அறிவிப்புகளை அறிந்து கொள்ளுங்கள்'
+    },
+    map: { title: 'சமூக வசதி வரைபடம்', hint: 'வசதி விவரங்களைக் காண முள்ளைக் கிளிக் செய்யவும்' },
+    calendar: { title: 'சமூக நிகழ்வு நாட்காட்டி', hint: 'நிகழ்வு விவரங்களைக் காண நிறமுள்ள தேதியைக் கிளிக் செய்யவும்' },
+    service: { title: 'உள்ளூர் சேவை அடைவு', phone: 'தொலைபேசி', email: 'மின்னஞ்சல்' },
+    volunteer: {
+      kicker: 'பங்கேற்கவும்',
+      registerNow: 'இப்போதே பதிவு செய்யவும்',
+      formTitle: 'தொண்டு பதிவு படிவம்',
+      close: 'மூடு',
+      fullName: 'முழு பெயர்',
+      phone: 'தொலைபேசி எண்',
+      address: 'வீட்டு முகவரி',
+      notes: 'குறிப்புகள் / தேவைகள் (விரும்பினால்)',
+      submitBtn: 'பதிவை சமர்ப்பிக்கவும்',
+      submitting: 'அனுப்புகிறது...',
+      requiredTip: 'தயவுசெய்து உங்கள் பெயர், தொலைபேசி எண்ணை நிரப்பி நடவடிக்கையைத் தேர்ந்தெடுக்கவும்.',
+      successTip: 'நன்றி! உங்கள் பதிவு சமர்ப்பிக்கப்பட்டது.',
+      errorTip: 'சமர்ப்பிப்பது தோல்வியடைந்தது.'
+    },
+    faq: { title: 'அடிக்கடி கேட்கப்படும் கேள்விகள்' },
+    chatbot: { open: 'பேச்சு', title: 'சமூக உதவியாளர்', placeholder: 'உங்கள் செய்தியை உள்ளிடவும்...', send: 'அனுப்பவும்', welcome: 'வணக்கம், இன்று என்ன உதவி செய்யலாம்?' },
+    report: { title: 'கருத்தை சமர்ப்பிக்கவும்', submit: 'சமர்ப்பிக்கவும்', submitting: 'சமர்ப்பிக்கிறது...' },
+    footer: { tagline: 'ஆரோக்கியத்தை மேம்படுத்தி வாழ்க்கையை வளப்படுத்துகிறோம்', copyright: '© 2026 MYCELIUM ஸ்மார்ட் சமூகம். அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டுள்ளன.' }
+  }
+};
+
+// 合并西班牙语支持
+function mergeLocale(base, translated) {
+  const merged = { ...base };
+  Object.entries(translated).forEach(([key, value]) => {
+    merged[key] = value && typeof value === "object" && !Array.isArray(value)
+      ? mergeLocale(base?.[key] && typeof base[key] === "object" ? base[key] : {}, value)
+      : value;
+  });
+  return merged;
+}
+
+i18n.es = mergeLocale(i18n.en, {
+  nav: { announcement: "ANUNCIOS", facilities: "INSTALACIONES", services: "DIRECTORIO DE SERVICIOS", events: "EVENTOS", volunteer: "INSCRIPCIÓN DE VOLUNTARIOS", faq: "PREGUNTAS FRECUENTES", searchPlaceholder: "Buscar..." },
+  common: { close: "Cerrar", submit: "Enviar", backToTop: "Volver arriba", readMore: "Leer más", all: "Todos", searchNoResult: "No se encontraron secciones. Prueba con otra búsqueda." },
+  announcement: { title: "Anuncios de la comunidad", subtitle: "Mantente al día con las noticias y avisos de tu comunidad.", tabAll: "Todos", tabEmergency: "Emergencias", tabMaintenance: "Mantenimiento", tabCommunity: "Comunidad", tabEvents: "Eventos" },
+  map: { title: "Mapa de instalaciones", hint: "Selecciona un marcador para ver los detalles." },
+  calendar: { title: "Calendario de eventos", hint: "Selecciona una fecha marcada para consultar el evento.", prev: "‹", next: "›" },
+  service: { title: "Directorio de servicios", phone: "Teléfono", email: "Correo electrónico" },
+  volunteer: {
+    kicker: "Participa", title: "Inscripción de voluntarios", subtitle: "Únete al equipo de voluntariado y contribuye a la comunidad.", registerNow: "Inscribirme", formTitle: "Formulario de voluntariado", close: "Cerrar", fullName: "Nombre completo", phone: "Número de teléfono", address: "Dirección", namePlaceholder: "Nombre y apellidos", addressPlaceholder: "Calle, número, ciudad y código postal", notesPlaceholder: "Por ejemplo: restricciones alimentarias o necesidades de accesibilidad", activityLabel: "Actividad:", notes: "Requisitos o notas (opcional)", submitBtn: "Enviar inscripción", submitting: "Enviando...", requiredTip: "Indica tu nombre, teléfono y selecciona una actividad.", successTip: "¡Gracias! Recibimos tu inscripción y nos pondremos en contacto pronto.", errorTip: "No se pudo enviar la inscripción. Comprueba tu conexión e inténtalo de nuevo."
+  },
+  report: { submitting: "Enviando..." },
+  faq: { title: "Preguntas frecuentes" },
+  chatbot: { open: "Chat", title: "Asistente comunitario", placeholder: "Escribe un mensaje...", send: "Enviar", welcome: "Hola. ¿En qué puedo ayudarte?" }
+});
+
+// 统一英雄区域文案
+i18n.en.heroIntro = { titleLine1: "Smart living,", titleLine2: "rooted in nature.", description: "A gated residential community built for wellness, safety and connection.", explore: "EXPLORE THE COMMUNITY", chooseLocation: "CHOOSE YOUR LOCATION" };
+i18n.es.heroIntro = { titleLine1: "Vida inteligente,", titleLine2: "arraigada en la naturaleza.", description: "Una comunidad residencial privada diseñada para el bienestar, la seguridad y la conexión.", explore: "EXPLORAR LA COMUNIDAD", chooseLocation: "ELIGE TU UBICACIÓN" };
+i18n["zh-CN"].heroIntro = { titleLine1: "智慧生活，", titleLine2: "根植于自然。", description: "一个以身心健康、安全与联结为核心的封闭式住宅社区。", explore: "探索社区", chooseLocation: "选择所在地区" };
+i18n.ms.heroIntro = { titleLine1: "Kehidupan pintar,", titleLine2: "berakar dalam alam semula jadi.", description: "Komuniti kediaman berpagar yang dibina demi kesejahteraan, keselamatan dan hubungan erat.", explore: "TEROKAI KOMUNITI", chooseLocation: "PILIH LOKASI ANDA" };
+i18n.ta.heroIntro = { titleLine1: "ஸ்மார்ட் வாழ்க்கை,", titleLine2: "இயற்கையில் வேரூன்றியது.", description: "நல்வாழ்வு, பாதுகாப்பு மற்றும் சமூகத் தொடர்பை மையமாகக் கொண்டு உருவாக்கப்பட்ட பாதுகாப்பான குடியிருப்பு சமூகம்.", explore: "சமூகத்தை ஆராயுங்கள்", chooseLocation: "உங்கள் இடத்தைத் தேர்ந்தெடுக்கவும்" };
+
+i18n.en.newsletter = { invalidEmail: "Please enter a valid email address.", submitting: "Submitting...", success: "Subscription successful! Thank you for subscribing.", failure: "Subscription failed, please try again later." };
+i18n["zh-CN"].newsletter = { invalidEmail: "请输入有效的电子邮箱地址。", submitting: "正在提交…", success: "订阅成功！感谢您的订阅。", failure: "订阅失败，请稍后重试。" };
+i18n.ms.newsletter = { invalidEmail: "Sila masukkan alamat e-mel yang sah.", submitting: "Sedang menghantar...", success: "Langganan berjaya! Terima kasih.", failure: "Langganan gagal. Sila cuba lagi kemudian." };
+i18n.ta.newsletter = { invalidEmail: "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.", submitting: "சமர்ப்பிக்கிறது...", success: "சந்தா வெற்றிகரமாக பதிவு செய்யப்பட்டது. நன்றி!", failure: "சந்தா பதிவு தோல்வியடைந்தது. பின்னர் மீண்டும் முயற்சிக்கவும்." };
+
+// Shared English source for standalone modules. The locale generator exports these
+// namespaces too, so future language packs can cover the whole public experience.
+i18n.en.gallery = {
+  kicker: "Gallery", title: "Moments worth remembering", sub: "A filmstrip of community moments — scroll through every frame.",
+  enter: "Enter Gallery", entering: "Entering…", close: "Close story", newer: "Newer", older: "Older",
+  when: "When", where: "Where", host: "Organised by", people: "Joined by", photo: "Photo slot",
+  by: "MYCELIUM Community Desk", explore: "Explore", back: "Back", empty: "No moments yet", date: "Date", place: "Place"
+};
+i18n.en.liveNews = {
+  kicker: "Live news", title: "Local news, live", sub: "Watch news channels for your region without leaving the community site.",
+  play: "Play live", resume: "Resume live", loadsOnPlay: "The video loads only when you press play.", paused: "Paused to save data while you were away.",
+  note: "If the video shows as unavailable, the channel is between broadcasts or has disabled embedding.", open: "Open on YouTube", channels: "News channels",
+  credit: "Video is provided by YouTube and the channel owner.", live: "Live", offline: "Not live", readNews: "Not playing? Read the latest news",
+  notLiveTitle: "Not live right now", notLiveBody: "{name} is not streaming at the moment. Open its latest news page instead?",
+  openNews: "Open latest news", tryAnyway: "Try the player anyway", stay: "Stay here"
+};
+i18n.en.airQuality = {
+  kicker: "Air quality", title: "Air quality today", sub: "Estimated US AQI for your community's area, updated through the day.",
+  loading: "Loading air quality…", error: "Air quality data is unavailable right now.", retry: "Try again", aqi: "US AQI", updated: "Updated",
+  trend: "Last 24 hours and next 12 hours", now: "Now", pollutants: "Main pollutants", official: "Official readings",
+  source: "Modelled estimate from Copernicus Atmosphere Monitoring Service data via Open-Meteo. It is not an official monitoring-station reading.",
+  good: "Good", moderate: "Moderate", sensitive: "Unhealthy for sensitive groups", unhealthy: "Unhealthy", veryUnhealthy: "Very unhealthy", hazardous: "Hazardous",
+  adviceGood: "Air quality is satisfactory. It is a good time to be outdoors.",
+  adviceModerate: "Acceptable for most people. Unusually sensitive people may want to take it easier outdoors.",
+  adviceSensitive: "Children, older adults and people with heart or lung conditions should limit long outdoor exertion.",
+  adviceUnhealthy: "Everyone should reduce prolonged outdoor exertion. Sensitive groups should stay indoors where possible.",
+  adviceVeryUnhealthy: "Avoid outdoor activity where you can. Keep windows closed.",
+  adviceHazardous: "Stay indoors with windows closed and follow guidance from local authorities."
+};
+i18n.en.featureDetails = {
+  smartFacilitiesModal: [
+    "Pay community charges and facility fees through a clear, convenient digital flow. Residents can review what they owe and keep a record of completed payments. This exhibition version uses a sandbox checkout, so no real money is charged.",
+    "Check availability and reserve shared spaces such as the gym, pool or community hall. A booking calendar helps residents plan ahead and avoid double bookings.",
+    "Submit requests for shared supplies or maintenance work and follow each request from submission to completion, helping management keep decisions transparent.",
+    "Send forms such as maintenance requests and resident applications online, then receive a clear confirmation so there is less paperwork and fewer follow-up calls."
+  ],
+  communitySafetyModal: [
+    "Keep service agreements, renewal dates and related documents organized in one place, so residents and management can understand what has been agreed.",
+    "Register expected guests and let residents know when a visitor arrives. Clear check-in steps help make entry smoother while preserving a human welcome.",
+    "Use shared-area camera systems to help the management team review safety incidents. Monitoring should follow local privacy rules and posted community policies.",
+    "Coordinate patrol routes and record observations so the team can respond consistently to concerns around entrances, paths and shared facilities."
+  ],
+  greenLivingModal: [
+    "Adjust watering schedules to weather and planting needs, helping gardens stay healthy while reducing avoidable water use.",
+    "Make recycling and composting easier to understand with clear sorting guidance and collection points residents can find around the community.",
+    "Provide charging points for electric vehicles and show residents where they are located, supporting lower-emission travel as the community grows.",
+    "Track practical steps such as efficient lighting and equipment schedules to reduce energy waste in shared spaces without compromising comfort."
+  ],
+  communityConnectModal: [
+    "Read current notices from your selected community, including service updates and time-sensitive information.",
+    "Browse the community calendar for upcoming activities, dates and practical event information.",
+    "Find volunteer opportunities, read what each activity involves and register to take part.",
+    "Reach the local management team using the contact information for the region currently selected on the website."
+  ],
+  ui: { soon: "Coming soon", soonNote: "Coming soon — this service is planned and not available yet.", openPortal: "Open in the resident portal →", viewCalendar: "View the community calendar →", exploreVolunteer: "Explore volunteer activities →", seeContacts: "See community contacts →", readNotices: "Read community notices →", sendMessage: "Send a message →", communityFeature: "Community feature" }
+};
+i18n.en.countryPicker = {
+  kicker: "MYCELIUM LOCATIONS", title: "Choose your community.", selected: "SELECTED", active: "Community site available",
+  button: "Continue to Mycelium", help: "Your location choice is saved on this device. You can change it any time.",
+  close: "Close location selector", heroLabel: "CHOOSE YOUR LOCATION", navLabel: "MYCELIUM LOCATION",
+  globeLoading: ["Loading the globe…", "Still loading — you can already pick a location below."]
+};
+i18n.en.footerActions = {
+  placeholder: "Email to subscribe, or write your message", report: "Write a report →",
+  hint: "Enter an email to join the newsletter. Write anything else and we will open the report form so you can send it to the management team."
+};
+
+// Reviewed translations for labels that sit outside the main navigation flow.
+// Keep the English source here so scripts/export-en-locale.mjs includes it in future AI locale runs.
+i18n.en.siteCopy = {
+  heroKicker: "Neighbourhood living, quietly elevated",
+  announcementKicker: "Board",
+  calendarKicker: "Diary",
+  featuresKicker: "The neighbourhood",
+  featuresTitle: "Four quiet promises of daily life"
+};
+i18n.es.siteCopy = {
+  heroKicker: "Vida de barrio, elevada con serenidad",
+  announcementKicker: "Tablón de anuncios",
+  calendarKicker: "Agenda",
+  featuresKicker: "El vecindario",
+  featuresTitle: "Cuatro promesas sencillas para la vida cotidiana"
+};
+i18n["zh-CN"].siteCopy = {
+  heroKicker: "邻里生活，静谧升华",
+  announcementKicker: "社区公告栏",
+  calendarKicker: "活动日记",
+  featuresKicker: "社区邻里",
+  featuresTitle: "日常生活的四项静谧承诺"
+};
+i18n.ms.siteCopy = {
+  heroKicker: "Kehidupan kejiranan yang lebih bermakna, dengan tenang",
+  announcementKicker: "Papan Pengumuman",
+  calendarKicker: "Diari Acara",
+  featuresKicker: "Kejiranan Kita",
+  featuresTitle: "Empat janji sederhana dalam kehidupan seharian"
+};
+i18n.ta.siteCopy = {
+  heroKicker: "அமைதியும் செம்மையும் நிறைந்த அக்கம்பக்க வாழ்க்கை",
+  announcementKicker: "சமூக அறிவிப்புப் பலகை",
+  calendarKicker: "நிகழ்வு நாட்குறிப்பு",
+  featuresKicker: "நமது அக்கம்பக்கம்",
+  featuresTitle: "அன்றாட வாழ்வின் நான்கு இனிய உறுதிமொழிகள்"
+};
+
+// Interface text that used to be hard-coded in index.html / JS: slide labels, accessible names, notice titles.
+// data-i18n-aria-label / data-i18n-title / data-i18n-alt attributes are applied in setLanguage().
+i18n.en.ui = {
+  "slide1": "01 — Notices",
+  "slide2": "02 — Grounds",
+  "slide3": "03 — Neighbours",
+  "slide4": "04 — Calendar",
+  "slide5": "05 — Give back",
+  "slide6": "06 — Guidance",
+  "photoSoon": "Photo coming soon",
+  "volunteerTag": "Volunteer",
+  "connectIntro": "Choose a community channel to learn how it works.",
+  "connect1": "Community updates",
+  "connect2": "Events calendar",
+  "connect3": "Volunteer activities",
+  "connect4": "Contact management",
+  "scroll": "SCROLL",
+  "residentPortal": "Resident Portal",
+  "aiMode": "AI MODE",
+  "thankYou": "Thank You",
+  "confirm": "Confirm",
+  "locationScrollUp": "Scroll up to change location",
+  "registrationSubmitted": "Registration Submitted",
+  "submissionError": "Submission Error",
+  "subscriptionError": "Subscription Error",
+  "viewEventDay": "View event for day {day}",
+  "communityService": "Community service",
+  "serviceFallback": "Service",
+  "aria": {
+    "loading": "Loading",
+    "adminSignIn": "Administrator sign in",
+    "openMenu": "Open menu",
+    "search": "Search",
+    "closeSearch": "Close search",
+    "communitySections": "Community sections",
+    "announcements": "Announcements",
+    "facilities": "Facilities",
+    "services": "Services",
+    "events": "Events",
+    "volunteer": "Volunteer",
+    "faq": "FAQ",
+    "closeAnnouncements": "Close announcements",
+    "facilitiesMap": "Community facilities map",
+    "closeMap": "Close map",
+    "sitePlan": "Community site plan",
+    "closeCalendar": "Close calendar",
+    "closeDirectory": "Close directory",
+    "closeFaq": "Close FAQ",
+    "pillars": "Community pillars",
+    "gallery": "Community gallery",
+    "enterGallery": "Enter Gallery",
+    "recentMoments": "Recent photo moments",
+    "back": "Back",
+    "volunteerForm": "Volunteer registration form",
+    "openChatbot": "Open community chatbot",
+    "chatbot": "Smart Community chatbot",
+    "submitFeedback": "Submit feedback",
+    "closeChatbot": "Close chatbot",
+    "chatMessage": "Chat message",
+    "quickPrompts": "Quick Prompts",
+    "toggleAi": "Toggle AI mode",
+    "sendMessage": "Send message",
+    "closeReport": "Close report form",
+    "close": "Close",
+    "closeAnnouncement": "Close announcement",
+    "backToMenu": "Back to community menu",
+    "language": "Language",
+    "closeDetails": "Close facility details"
+  },
+  "subscribed": "Subscribed",
+  "notice": "Notice",
+  "skipIntro": "SKIP INTRO",
+  "mapPrev": "Previous",
+  "mapNext": "Next",
+  "portalShort": "Portal"
+};
+i18n.es.ui = {
+  "slide1": "01 — Avisos",
+  "slide2": "02 — Espacios",
+  "slide3": "03 — Vecinos",
+  "slide4": "04 — Calendario",
+  "slide5": "05 — Aportar",
+  "slide6": "06 — Guía",
+  "photoSoon": "Foto próximamente",
+  "volunteerTag": "Voluntariado",
+  "connectIntro": "Elige un canal comunitario para ver cómo funciona.",
+  "connect1": "Novedades de la comunidad",
+  "connect2": "Calendario de eventos",
+  "connect3": "Actividades de voluntariado",
+  "connect4": "Contacto con la administración",
+  "scroll": "DESPLÁZATE",
+  "residentPortal": "Portal de residentes",
+  "aiMode": "MODO IA",
+  "thankYou": "Gracias",
+  "confirm": "Aceptar",
+  "locationScrollUp": "Sube para cambiar de ubicación",
+  "registrationSubmitted": "Registro enviado",
+  "submissionError": "Error al enviar",
+  "subscriptionError": "Error de suscripción",
+  "viewEventDay": "Ver el evento del día {day}",
+  "communityService": "Servicio comunitario",
+  "serviceFallback": "Servicio",
+  "aria": {
+    "loading": "Cargando",
+    "adminSignIn": "Inicio de sesión de administrador",
+    "openMenu": "Abrir menú",
+    "search": "Buscar",
+    "closeSearch": "Cerrar búsqueda",
+    "communitySections": "Secciones de la comunidad",
+    "announcements": "Anuncios",
+    "facilities": "Instalaciones",
+    "services": "Servicios",
+    "events": "Eventos",
+    "volunteer": "Voluntariado",
+    "faq": "Preguntas frecuentes",
+    "closeAnnouncements": "Cerrar anuncios",
+    "facilitiesMap": "Mapa de instalaciones de la comunidad",
+    "closeMap": "Cerrar mapa",
+    "sitePlan": "Plano del conjunto residencial",
+    "closeCalendar": "Cerrar calendario",
+    "closeDirectory": "Cerrar directorio",
+    "closeFaq": "Cerrar preguntas frecuentes",
+    "pillars": "Pilares de la comunidad",
+    "gallery": "Galería de la comunidad",
+    "enterGallery": "Entrar a la galería",
+    "recentMoments": "Momentos recientes en fotos",
+    "back": "Atrás",
+    "volunteerForm": "Formulario de inscripción de voluntarios",
+    "openChatbot": "Abrir el chatbot de la comunidad",
+    "chatbot": "Chatbot de Comunidad Inteligente",
+    "submitFeedback": "Enviar comentarios",
+    "closeChatbot": "Cerrar chatbot",
+    "chatMessage": "Mensaje de chat",
+    "quickPrompts": "Preguntas rápidas",
+    "toggleAi": "Activar o desactivar el modo IA",
+    "sendMessage": "Enviar mensaje",
+    "closeReport": "Cerrar formulario de reporte",
+    "close": "Cerrar",
+    "closeAnnouncement": "Cerrar anuncio",
+    "backToMenu": "Volver al menú de la comunidad",
+    "language": "Idioma",
+    "closeDetails": "Cerrar detalles de la instalación"
+  },
+  "subscribed": "Suscripción confirmada",
+  "notice": "Aviso",
+  "skipIntro": "OMITIR INTRODUCCIÓN",
+  "mapPrev": "Anterior",
+  "mapNext": "Siguiente",
+  "portalShort": "Portal"
+};
+i18n["zh-CN"].ui = {
+  "slide1": "01 — 公告",
+  "slide2": "02 — 场地",
+  "slide3": "03 — 邻里",
+  "slide4": "04 — 日历",
+  "slide5": "05 — 回馈",
+  "slide6": "06 — 指南",
+  "photoSoon": "照片即将上传",
+  "volunteerTag": "志愿服务",
+  "connectIntro": "选择一个社区渠道，了解其使用方式。",
+  "connect1": "社区动态",
+  "connect2": "活动日历",
+  "connect3": "志愿者活动",
+  "connect4": "联系管理处",
+  "scroll": "向下滚动",
+  "residentPortal": "居民门户",
+  "aiMode": "AI 模式",
+  "thankYou": "谢谢",
+  "confirm": "确定",
+  "locationScrollUp": "向上滚动以切换地点",
+  "registrationSubmitted": "报名已提交",
+  "submissionError": "提交失败",
+  "subscriptionError": "订阅失败",
+  "viewEventDay": "查看 {day} 日的活动",
+  "communityService": "社区服务",
+  "serviceFallback": "服务",
+  "aria": {
+    "loading": "加载中",
+    "adminSignIn": "管理员登录",
+    "openMenu": "打开菜单",
+    "search": "搜索",
+    "closeSearch": "关闭搜索",
+    "communitySections": "社区板块",
+    "announcements": "公告",
+    "facilities": "设施",
+    "services": "服务",
+    "events": "活动",
+    "volunteer": "志愿者",
+    "faq": "常见问题",
+    "closeAnnouncements": "关闭公告",
+    "facilitiesMap": "社区设施地图",
+    "closeMap": "关闭地图",
+    "sitePlan": "社区总平面图",
+    "closeCalendar": "关闭日历",
+    "closeDirectory": "关闭目录",
+    "closeFaq": "关闭常见问题",
+    "pillars": "社区四大支柱",
+    "gallery": "社区相册",
+    "enterGallery": "进入相册",
+    "recentMoments": "近期照片瞬间",
+    "back": "返回",
+    "volunteerForm": "志愿者报名表",
+    "openChatbot": "打开社区聊天助手",
+    "chatbot": "智慧社区聊天助手",
+    "submitFeedback": "提交反馈",
+    "closeChatbot": "关闭聊天助手",
+    "chatMessage": "聊天消息",
+    "quickPrompts": "快捷提问",
+    "toggleAi": "切换 AI 模式",
+    "sendMessage": "发送消息",
+    "closeReport": "关闭反馈表单",
+    "close": "关闭",
+    "closeAnnouncement": "关闭公告",
+    "backToMenu": "返回社区菜单",
+    "language": "语言",
+    "closeDetails": "关闭设施详情"
+  },
+  "subscribed": "订阅成功",
+  "notice": "提示",
+  "skipIntro": "跳过开场",
+  "mapPrev": "上一个",
+  "mapNext": "下一个",
+  "portalShort": "居民门户"
+};
+i18n.ms.ui = {
+  "slide1": "01 — Notis",
+  "slide2": "02 — Kawasan",
+  "slide3": "03 — Kejiranan",
+  "slide4": "04 — Kalendar",
+  "slide5": "05 — Menyumbang",
+  "slide6": "06 — Panduan",
+  "photoSoon": "Foto akan datang",
+  "volunteerTag": "Sukarelawan",
+  "connectIntro": "Pilih saluran komuniti untuk mengetahui cara ia berfungsi.",
+  "connect1": "Kemas kini komuniti",
+  "connect2": "Kalendar acara",
+  "connect3": "Aktiviti sukarelawan",
+  "connect4": "Hubungi pihak pengurusan",
+  "scroll": "TATAL",
+  "residentPortal": "Portal Penduduk",
+  "aiMode": "MOD AI",
+  "thankYou": "Terima Kasih",
+  "confirm": "Sahkan",
+  "locationScrollUp": "Tatal ke atas untuk menukar lokasi",
+  "registrationSubmitted": "Pendaftaran Dihantar",
+  "submissionError": "Ralat Penghantaran",
+  "subscriptionError": "Ralat Langganan",
+  "viewEventDay": "Lihat acara pada hari {day}",
+  "communityService": "Perkhidmatan komuniti",
+  "serviceFallback": "Perkhidmatan",
+  "aria": {
+    "loading": "Memuatkan",
+    "adminSignIn": "Log masuk pentadbir",
+    "openMenu": "Buka menu",
+    "search": "Cari",
+    "closeSearch": "Tutup carian",
+    "communitySections": "Bahagian komuniti",
+    "announcements": "Pengumuman",
+    "facilities": "Kemudahan",
+    "services": "Perkhidmatan",
+    "events": "Acara",
+    "volunteer": "Sukarelawan",
+    "faq": "Soalan Lazim",
+    "closeAnnouncements": "Tutup pengumuman",
+    "facilitiesMap": "Peta kemudahan komuniti",
+    "closeMap": "Tutup peta",
+    "sitePlan": "Pelan tapak komuniti",
+    "closeCalendar": "Tutup kalendar",
+    "closeDirectory": "Tutup direktori",
+    "closeFaq": "Tutup Soalan Lazim",
+    "pillars": "Tonggak komuniti",
+    "gallery": "Galeri komuniti",
+    "enterGallery": "Masuk galeri",
+    "recentMoments": "Detik foto terkini",
+    "back": "Kembali",
+    "volunteerForm": "Borang pendaftaran sukarelawan",
+    "openChatbot": "Buka chatbot komuniti",
+    "chatbot": "Chatbot Komuniti Pintar",
+    "submitFeedback": "Hantar maklum balas",
+    "closeChatbot": "Tutup chatbot",
+    "chatMessage": "Mesej sembang",
+    "quickPrompts": "Soalan pantas",
+    "toggleAi": "Togol mod AI",
+    "sendMessage": "Hantar mesej",
+    "closeReport": "Tutup borang laporan",
+    "close": "Tutup",
+    "closeAnnouncement": "Tutup pengumuman",
+    "backToMenu": "Kembali ke menu komuniti",
+    "language": "Bahasa",
+    "closeDetails": "Tutup butiran kemudahan"
+  },
+  "subscribed": "Berjaya Melanggan",
+  "notice": "Notis",
+  "skipIntro": "LANGKAU PENGENALAN",
+  "mapPrev": "Sebelumnya",
+  "mapNext": "Seterusnya",
+  "portalShort": "Portal"
+};
+i18n.ta.ui = {
+  "slide1": "01 — அறிவிப்புகள்",
+  "slide2": "02 — வளாகம்",
+  "slide3": "03 — அக்கம்பக்கம்",
+  "slide4": "04 — நாட்காட்டி",
+  "slide5": "05 — பங்களிப்பு",
+  "slide6": "06 — வழிகாட்டல்",
+  "photoSoon": "புகைப்படம் விரைவில்",
+  "volunteerTag": "தொண்டு",
+  "connectIntro": "இது எவ்வாறு செயல்படுகிறது என்பதை அறிய ஒரு சமூக வழியைத் தேர்ந்தெடுக்கவும்.",
+  "connect1": "சமூகப் புதுப்பிப்புகள்",
+  "connect2": "நிகழ்வு நாட்காட்டி",
+  "connect3": "தொண்டு செயல்பாடுகள்",
+  "connect4": "நிர்வாகத் தொடர்பு",
+  "scroll": "கீழே நகர்த்தவும்",
+  "residentPortal": "குடியிருப்பாளர் தளம்",
+  "aiMode": "AI முறை",
+  "thankYou": "நன்றி",
+  "confirm": "உறுதிசெய்",
+  "locationScrollUp": "இடத்தை மாற்ற மேலே நகர்த்தவும்",
+  "registrationSubmitted": "பதிவு சமர்ப்பிக்கப்பட்டது",
+  "submissionError": "சமர்ப்பிப்புப் பிழை",
+  "subscriptionError": "சந்தாப் பிழை",
+  "viewEventDay": "{day}ஆம் தேதி நிகழ்வைப் பார்க்கவும்",
+  "communityService": "சமூகச் சேவை",
+  "serviceFallback": "சேவை",
+  "aria": {
+    "loading": "ஏற்றுகிறது",
+    "adminSignIn": "நிர்வாகி உள்நுழைவு",
+    "openMenu": "பட்டியலைத் திற",
+    "search": "தேடு",
+    "closeSearch": "தேடலை மூடு",
+    "communitySections": "சமூகப் பிரிவுகள்",
+    "announcements": "அறிவிப்புகள்",
+    "facilities": "வசதிகள்",
+    "services": "சேவைகள்",
+    "events": "நிகழ்வுகள்",
+    "volunteer": "தொண்டு",
+    "faq": "அடிக்கடி கேட்கப்படும் கேள்விகள்",
+    "closeAnnouncements": "அறிவிப்புகளை மூடு",
+    "facilitiesMap": "சமூக வசதிகள் வரைபடம்",
+    "closeMap": "வரைபடத்தை மூடு",
+    "sitePlan": "சமூக இடத் திட்டம்",
+    "closeCalendar": "நாட்காட்டியை மூடு",
+    "closeDirectory": "அடைவை மூடு",
+    "closeFaq": "கேள்விகளை மூடு",
+    "pillars": "சமூகத் தூண்கள்",
+    "gallery": "சமூகப் படத்தொகுப்பு",
+    "enterGallery": "படத்தொகுப்பில் நுழை",
+    "recentMoments": "சமீபத்திய புகைப்படத் தருணங்கள்",
+    "back": "பின்செல்",
+    "volunteerForm": "தொண்டர் பதிவுப் படிவம்",
+    "openChatbot": "சமூக chatbot-ஐத் திற",
+    "chatbot": "ஸ்மார்ட் சமூக chatbot",
+    "submitFeedback": "கருத்தை அனுப்பு",
+    "closeChatbot": "chatbot-ஐ மூடு",
+    "chatMessage": "அரட்டைச் செய்தி",
+    "quickPrompts": "விரைவுக் கேள்விகள்",
+    "toggleAi": "AI முறையை மாற்று",
+    "sendMessage": "செய்தி அனுப்பு",
+    "closeReport": "புகார்ப் படிவத்தை மூடு",
+    "close": "மூடு",
+    "closeAnnouncement": "அறிவிப்பை மூடு",
+    "backToMenu": "சமூக மெனுவுக்குத் திரும்பு",
+    "language": "மொழி",
+    "closeDetails": "வசதி விவரங்களை மூடு"
+  },
+  "subscribed": "சந்தா பதிவானது",
+  "notice": "அறிவிப்பு",
+  "skipIntro": "அறிமுகத்தைத் தவிர்",
+  "mapPrev": "முந்தையது",
+  "mapNext": "அடுத்தது",
+  "portalShort": "Portal"
+};
+
+
+i18n.en.calendar.weekdays = { sun: "Sun", mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat" };
+i18n.es.calendar.weekdays = { sun: "dom", mon: "lun", tue: "mar", wed: "mié", thu: "jue", fri: "vie", sat: "sáb" };
+i18n["zh-CN"].calendar.weekdays = { sun: "日", mon: "一", tue: "二", wed: "三", thu: "四", fri: "五", sat: "六" };
+i18n.ms.calendar.weekdays = { sun: "Ahd", mon: "Isn", tue: "Sel", wed: "Rab", thu: "Kha", fri: "Jum", sat: "Sab" };
+i18n.ta.calendar.weekdays = { sun: "ஞாயி", mon: "திங்", tue: "செவ்", wed: "புத", thu: "வியா", fri: "வெள்", sat: "சனி" };
+
+i18n.en.announcement.factDate = "DATE";
+i18n.en.announcement.factTime = "TIME";
+i18n.en.announcement.factLocation = "LOCATION";
+i18n.es.announcement.factDate = "FECHA";
+i18n.es.announcement.factTime = "HORA";
+i18n.es.announcement.factLocation = "LUGAR";
+i18n["zh-CN"].announcement.factDate = "日期";
+i18n["zh-CN"].announcement.factTime = "时间";
+i18n["zh-CN"].announcement.factLocation = "地点";
+i18n.ms.announcement.factDate = "TARIKH";
+i18n.ms.announcement.factTime = "MASA";
+i18n.ms.announcement.factLocation = "LOKASI";
+i18n.ta.announcement.factDate = "தேதி";
+i18n.ta.announcement.factTime = "நேரம்";
+i18n.ta.announcement.factLocation = "இடம்";
+
+// Built-in FAQ fallback for Malaysian sites. Live Firestore FAQ documents take priority when present.
+i18n.en.faq.items = [
+  { q: "How do I become a member of Smart Community?", a: "Membership is open to all residents and community stakeholders. Simply visit the Volunteer Registration section or contact our community office. New members receive a welcome package, community guide, and access to all digital platforms." },
+  { q: "What facilities are available in the community?", a: "Our community features a Community Hall, Health Clinic, Children's Playground, Sports Center with gym and pool, and a 2-acre Central Park. All facilities are accessible to all residents." },
+  { q: "How can I report a maintenance issue or safety concern?", a: "You can report issues through the Community Assistant chatbot, email myceliumresidence07@gmail.com, or call our 24/7 hotline at +60 10-557 0900. All non-emergency reports are addressed within 48 hours." },
+  { q: "Are there age-specific programs and activities?", a: "Yes! We offer programs for all ages: toddler storytime, youth sports leagues, adult fitness classes, and senior wellness walks." },
+  { q: "How does the community newsletter work?", a: "Our weekly newsletter is delivered every Monday morning via email. Subscribe at the bottom of this page or at the community office." },
+  { q: "What are the community rules and guidelines?", a: "Key guidelines include: quiet hours from 10 PM to 7 AM, proper waste sorting, pet leash requirements, and parking regulations." }
+];
+i18n.es.faq.items = [
+  { q: "¿Cómo puedo hacerme miembro de la Comunidad Inteligente?", a: "La membresía está abierta a todos los residentes y colaboradores de la comunidad. Visite la sección de Inscripción de Voluntarios o póngase en contacto con nuestra oficina. Los nuevos miembros reciben un paquete de bienvenida, una guía de la comunidad y acceso a todas las plataformas digitales." },
+  { q: "¿Qué instalaciones hay disponibles en la comunidad?", a: "La comunidad cuenta con un salón comunitario, una clínica de salud, un parque infantil, un centro deportivo con gimnasio y piscina, y un parque central de aproximadamente 0,8 hectáreas. Todos los residentes pueden utilizar estas instalaciones." },
+  { q: "¿Cómo puedo informar de un problema de mantenimiento o de seguridad?", a: "Puede informar del problema mediante el asistente comunitario, escribir a myceliumresidence07@gmail.com o llamar a nuestra línea de atención 24 horas al +60 10-557 0900. Los avisos que no sean de emergencia se atienden en un plazo de 48 horas." },
+  { q: "¿Hay programas y actividades para distintas edades?", a: "¡Sí! Ofrecemos actividades para todas las edades: cuentos para niños pequeños, ligas deportivas juveniles, clases de ejercicio para adultos y paseos de bienestar para personas mayores." },
+  { q: "¿Cómo funciona el boletín de la comunidad?", a: "Nuestro boletín semanal se envía por correo electrónico todos los lunes por la mañana. Puede suscribirse al final de esta página o en la oficina de la comunidad." },
+  { q: "¿Cuáles son las normas y recomendaciones de la comunidad?", a: "Entre las principales normas se incluyen el horario de silencio de 22:00 a 7:00, la separación correcta de residuos, el uso de correa para las mascotas y el cumplimiento de las reglas de estacionamiento." }
+];
+i18n["zh-CN"].faq.items = [
+  { q: "如何成为智慧社区的会员？", a: "所有居民及社区相关人士均可申请加入。您可以前往志愿者报名板块，或联系社区办公室。新会员将获得欢迎资料包、社区指南，并可使用所有数字平台。" },
+  { q: "社区有哪些设施？", a: "社区设有社区礼堂、健康诊所、儿童游乐场、配备健身房与泳池的运动中心，以及一座约 0.8 公顷的中央公园。所有居民均可使用这些设施。" },
+  { q: "如何报告维修问题或安全隐患？", a: "您可以通过社区助手聊天机器人提交报告、发送邮件至 myceliumresidence07@gmail.com，或拨打 24 小时热线 +60 10-557 0900。非紧急报告通常会在 48 小时内处理。" },
+  { q: "社区是否提供适合不同年龄层的活动？", a: "有的！我们为各年龄层安排活动，包括幼儿故事时间、青少年运动联赛、成人健身课程，以及长者健康散步活动。" },
+  { q: "如何订阅社区通讯？", a: "社区通讯每周一早上通过电子邮件发送。您可以在本页面底部或社区办公室办理订阅。" },
+  { q: "社区有哪些规章制度？", a: "主要规定包括：每晚 10 点至早上 7 点为安静时段、正确进行垃圾分类、宠物在公共区域须牵绳，以及遵守停车管理规定。" }
+];
+i18n.ms.faq.items = [
+  { q: "Bagaimanakah saya boleh menjadi ahli Komuniti Pintar?", a: "Keahlian terbuka kepada semua penduduk dan pihak berkepentingan komuniti. Kunjungi bahagian Pendaftaran Sukarelawan atau hubungi pejabat pengurusan komuniti. Ahli baharu akan menerima pek alu-aluan, panduan komuniti dan akses kepada semua platform digital." },
+  { q: "Apakah kemudahan yang terdapat dalam komuniti ini?", a: "Komuniti kami mempunyai dewan komuniti, klinik kesihatan, taman permainan kanak-kanak, pusat sukan dengan gim dan kolam renang, serta taman pusat seluas kira-kira 0.8 hektar. Semua penduduk boleh menggunakan kemudahan ini." },
+  { q: "Bagaimanakah saya boleh melaporkan masalah penyelenggaraan atau isu keselamatan?", a: "Anda boleh membuat laporan melalui chatbot Pembantu Komuniti, e-mel myceliumresidence07@gmail.com atau talian hotline 24 jam kami di +60 10-557 0900. Laporan bukan kecemasan akan ditangani dalam tempoh 48 jam." },
+  { q: "Adakah terdapat program dan aktiviti untuk kumpulan umur yang berbeza?", a: "Ya! Kami menyediakan aktiviti untuk semua peringkat umur, termasuk sesi bercerita untuk kanak-kanak kecil, liga sukan remaja, kelas kecergasan dewasa dan aktiviti berjalan sihat untuk warga emas." },
+  { q: "Bagaimanakah buletin komuniti berfungsi?", a: "Buletin mingguan kami dihantar melalui e-mel setiap pagi Isnin. Anda boleh melanggan di bahagian bawah halaman ini atau di pejabat komuniti." },
+  { q: "Apakah peraturan dan panduan komuniti?", a: "Antara panduan utama ialah waktu senyap dari 10 malam hingga 7 pagi, pengasingan sisa yang betul, keperluan memakaikan tali pada haiwan peliharaan dan pematuhan peraturan tempat letak kereta." }
+];
+i18n.ta.faq.items = [
+  { q: "ஸ்மார்ட் சமூகத்தின் உறுப்பினராக எப்படி சேரலாம்?", a: "அனைத்து குடியிருப்பாளர்களும் சமூகப் பங்குதாரர்களும் உறுப்பினராகலாம். தன்னார்வலர் பதிவு பகுதியைப் பார்வையிடவும் அல்லது சமூக நிர்வாக அலுவலகத்தைத் தொடர்புகொள்ளவும். புதிய உறுப்பினர்களுக்கு வரவேற்புத் தொகுப்பு, சமூக வழிகாட்டி மற்றும் அனைத்து டிஜிட்டல் தளங்களுக்கான அணுகலும் வழங்கப்படும்." },
+  { q: "சமூகத்தில் என்னென்ன வசதிகள் உள்ளன?", a: "சமூகக் கூடம், சுகாதார மருத்துவமனை, குழந்தைகள் விளையாட்டு மைதானம், உடற்பயிற்சிக் கூடம் மற்றும் நீச்சல் குளம் கொண்ட விளையாட்டு மையம், மேலும் சுமார் 0.8 ஹெக்டேர் பரப்பளவுள்ள மத்தியப் பூங்கா ஆகியவை உள்ளன. அனைத்து குடியிருப்பாளர்களும் இவ்வசதிகளைப் பயன்படுத்தலாம்." },
+  { q: "பராமரிப்புப் பிரச்சினை அல்லது பாதுகாப்புக் கவலையை எப்படித் தெரிவிப்பது?", a: "சமூக உதவியாளர் chatbot மூலம் புகாரளிக்கலாம், myceliumresidence07@gmail.com என்ற முகவரிக்கு மின்னஞ்சல் அனுப்பலாம் அல்லது +60 10-557 0900 என்ற 24 மணி நேர உதவி எண்ணை அழைக்கலாம். அவசரமற்ற புகார்கள் 48 மணி நேரத்திற்குள் கையாளப்படும்." },
+  { q: "வெவ்வேறு வயதினருக்கான திட்டங்களும் செயல்பாடுகளும் உள்ளனவா?", a: "ஆம்! சிறு குழந்தைகளுக்கான கதை நேரம், இளைஞர்களுக்கான விளையாட்டுப் போட்டிகள், பெரியவர்களுக்கான உடற்பயிற்சி வகுப்புகள் மற்றும் மூத்த குடிமக்களுக்கான நலநடை நிகழ்ச்சிகள் என அனைத்து வயதினருக்கும் செயல்பாடுகள் உள்ளன." },
+  { q: "சமூகச் செய்திமடல் எவ்வாறு செயல்படுகிறது?", a: "எங்கள் வாராந்திரச் செய்திமடல் ஒவ்வொரு திங்கட்கிழமை காலையிலும் மின்னஞ்சல் மூலம் அனுப்பப்படும். இந்தப் பக்கத்தின் கீழ்ப்பகுதியில் அல்லது சமூக அலுவலகத்தில் நீங்கள் சந்தா செய்யலாம்." },
+  { q: "சமூகத்தின் விதிமுறைகளும் வழிகாட்டுதல்களும் என்ன?", a: "முக்கிய வழிகாட்டுதல்களில் இரவு 10 மணி முதல் காலை 7 மணி வரை அமைதிநேரம் கடைப்பிடித்தல், கழிவுகளைச் சரியாகப் பிரித்தல், பொதுப் பகுதிகளில் செல்லப்பிராணிகளுக்குக் கயிறு பயன்படுத்துதல் மற்றும் வாகன நிறுத்த விதிகளைப் பின்பற்றுதல் ஆகியவை அடங்கும்." }
+];
+
+function t(key) {
+  const value = key.split('.').reduce((obj, k) => obj?.[k], i18n[currentLang]);
+  if (value !== undefined && value !== null && value !== '') return value;
+  const english = key.split('.').reduce((obj, k) => obj?.[k], i18n[DEFAULT_LANG]);
+  return english !== undefined && english !== null && english !== '' ? english : key;
+}
+window.t = t;
+window.MYCELIUM_I18N = { get: (code) => i18n[code] || i18n[DEFAULT_LANG], t };
+
+let languageRequestId = 0;
+async function setLanguage(langCode) {
+  const registry = window.MYCELIUM_LANGS;       // language-picker.js: every language beyond the five built-in ones
+  const requestId = ++languageRequestId;
+  if (registry?.has(langCode)) {
+    await registry.ready?.(); // wait for the locale manifest so built-in packs are not missed at first paint
+    if (registry.hasPack?.(langCode) || !i18n[langCode]) {
+      await registry.ensureLoaded(langCode, i18n); // merges optional locale packs over reviewed built-in copy
+    }
+    if (requestId !== languageRequestId) return;  // a newer choice has taken over meanwhile
+  }
+  if (!i18n[langCode]) langCode = DEFAULT_LANG;
+  const siteConfig = window.MYCELIUM_COUNTRY_CONFIG;
+  const isRegistryLang = Boolean(registry?.has(langCode)) && !['en', 'es', 'zh-CN', 'ms', 'ta'].includes(langCode);
+  if (!isRegistryLang && siteConfig?.languages && !siteConfig.languages.includes(langCode)) langCode = siteConfig.languages[0] || DEFAULT_LANG;
+  
+  currentLang = langCode;
+  window.currentLang = langCode;
+  localStorage.setItem(STORAGE_KEY, langCode);
+  document.documentElement.lang = langCode;
+  document.documentElement.dir = registry?.dir(langCode) || 'ltr';
+  registry?.applyFont(langCode);
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const translated = String(t(el.getAttribute('data-i18n')));
+    const strong = el.querySelector(':scope > strong');
+    if (strong) {
+      // Keep the emphasis around the translated lead-in in the volunteer cards.
+      const split = translated.match(/^(.{1,48}?[:：])\s*(.*)$/s);
+      if (split) {
+        strong.textContent = split[1];
+        const rest = document.createTextNode(split[2] ? ` ${split[2]}` : '');
+        [...el.childNodes].forEach((node) => { if (node !== strong) node.remove(); });
+        el.append(rest);
+        return;
+      }
+    }
+    const breaks = [...el.querySelectorAll(':scope > br')];
+    if (breaks.length) {
+      // Retain intentional line breaks without injecting translated HTML.
+      const originalSegments = [];
+      let segment = '';
+      [...el.childNodes].forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+          originalSegments.push(segment); segment = '';
+        } else segment += node.textContent || '';
+      });
+      originalSegments.push(segment);
+      const total = originalSegments.reduce((sum, part) => sum + part.length, 0) || translated.length;
+      const chunks = [];
+      let remaining = translated;
+      let consumedWeight = 0;
+      originalSegments.slice(0, -1).forEach((part, index) => {
+        consumedWeight += part.length;
+        const target = Math.round(translated.length * consumedWeight / total);
+        let cut = Math.max(0, Math.min(remaining.length, target - chunks.join('').length));
+        if (cut > 0 && cut < remaining.length) {
+          const space = remaining.lastIndexOf(' ', cut);
+          if (space > cut * 0.55) cut = space;
+        }
+        chunks.push(remaining.slice(0, cut).trim());
+        remaining = remaining.slice(cut).trim();
+      });
+      chunks.push(remaining);
+      const fragment = document.createDocumentFragment();
+      chunks.forEach((part, index) => {
+        if (index) fragment.append(document.createElement('br'));
+        fragment.append(document.createTextNode(part));
+      });
+      el.replaceChildren(fragment);
+    } else {
+      el.textContent = translated;
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+  // Accessible names, tooltips and image descriptions: <el data-i18n-aria-label="ui.aria.close"> etc.
+  [['aria-label', 'data-i18n-aria-label'], ['title', 'data-i18n-title'], ['alt', 'data-i18n-alt']].forEach(([attribute, hook]) => {
+    document.querySelectorAll(`[${hook}]`).forEach(el => el.setAttribute(attribute, String(t(el.getAttribute(hook)))));
+  });
+
+  const currentLangText = document.getElementById('currentLangText');
+  if (currentLangText) {
+    currentLangText.textContent = registry?.label(langCode) || LANG_LABELS[langCode] || langCode;
+  }
+  const languageIcon = document.querySelector('.lang-icon');
+  if (languageIcon) languageIcon.textContent = registry?.short(langCode) || (langCode || 'en').slice(0, 2).toUpperCase();
+
+  if (typeof renderFAQItems === 'function') renderFAQItems();
+  if (typeof renderServiceCards === 'function') renderServiceCards();
+  if (typeof renderAnnouncementList === 'function') renderAnnouncementList('all');
+  if (typeof buildCalendar === 'function') buildCalendar();
+  if (typeof updateMapPinsLanguage === 'function') updateMapPinsLanguage(); 
+  window.dispatchEvent(new CustomEvent('mycelium:languagechange', { detail: langCode }));
+}
+
+// 兼容判断：只要是槟城或默认马来西亚，均使用内置点位
+function isDefaultMalaysia(code) {
+  const c = String(code || "").toUpperCase();
+  return c === "MY" || c === "MY_PP";
+}
+
+// ---- Facility photos shown in the map info card -------------------------------------------
+// Files live in img/Facilities/ (see the README there). The extension is probed: .jpg, .webp, .png.
+const FACILITY_PIN_PHOTOS = {
+  basketball: "basketball-court", tennis: "tennis-court", gym: "gym", pool: "swimming-pool",
+  playground: "playground", clubhouse: "clubhouse", park: "community-park", parking: "guest-parking",
+  recycle1: "recycling-point", recycle2: "recycling-point", pond: "pond",
+};
+let facilityPhotoToken = 0;
+function facilityPhotoBase(pin) {
+  if (!pin) return "";
+  if (pin.dataset.photo) return pin.dataset.photo;
+
+  const file = FACILITY_PIN_PHOTOS[pin.dataset.pinId];
+  return file ? `/img/Facilities/${file}` : "";
+}
+const facilityPhotoCache = new Map();   // base -> Promise<已下载并解码的 URL | null>
+function loadFacilityPhoto(base, priority = "auto") {
+  if (!base) return Promise.resolve(null);
+  if (facilityPhotoCache.has(base)) return facilityPhotoCache.get(base);
+  const exts = /\.(jpe?g|png|webp|avif)(\?.*)?$/i.test(base) ? [""] : [".webp", ".jpg", ".jpeg", ".png", ".avif"];
+  const promise = (async () => {
+    for (const ext of exts) {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = priority;
+      image.src = base + ext;
+      try { await image.decode(); return base + ext; } catch (error) { /* 换下一个扩展名 */ }
+    }
+    return null;
+  })();
+  facilityPhotoCache.set(base, promise);
+  promise.then((url) => { if (!url) facilityPhotoCache.delete(base); });   // 失败的允许以后重试
+  return promise;
+}
+
+function showFacilityPhoto(base, label) {
+  const wrap = document.getElementById("mapInfoPhoto");
+  const img = wrap?.querySelector("img");
+  if (!wrap || !img) return;
+  const token = ++facilityPhotoToken;
+  wrap.classList.remove("has-photo");
+  img.alt = label || "";
+  if (!base) { img.removeAttribute("src"); return; }
+  loadFacilityPhoto(base, "high").then((url) => {
+    if (token !== facilityPhotoToken || !url) return;
+    img.src = url;
+    wrap.classList.add("has-photo");
+  });
+}
+
+// 打开地图后在空闲时把所有设施图按顺序、低优先级预取；用户一碰 pin 就立刻抢先加载那一张
+function warmFacilityPhotos(pins) {
+  if (navigator.connection?.saveData) return;
+  const bases = [...new Set(pins.map(facilityPhotoBase).filter(Boolean))];
+  const run = async () => { for (const base of bases) await loadFacilityPhoto(base, "low"); };
+  if ("requestIdleCallback" in window) window.requestIdleCallback(run, { timeout: 1500 });
+  else setTimeout(run, 300);
+}
+
+function updateMapPinsLanguage() {
+  if (window.MYCELIUM_COUNTRY_CONFIG?.mapPins) return;
+  const pins = document.querySelectorAll("#mapOverlay .pin");
+  const mapInfoTitle = document.getElementById("mapInfoTitle");
+  const mapInfoDesc = document.getElementById("mapInfoDesc");
+  const pinData = i18n[currentLang]?.mapPins;
+  if (!pinData) return;
+
+  pins.forEach(pin => {
+    pin.hidden = false;
+    pin.style.display = "";
+    const pinId = pin.dataset.pinId;
+    if (!pinId || !pinData[pinId]) return;
+    
+    pin.dataset.name = pinData[pinId].name;
+    pin.dataset.desc = pinData[pinId].desc;
+    pin.setAttribute("aria-label", pinData[pinId].name);
+
+    if (pin.classList.contains("active")) {
+      if (mapInfoTitle) mapInfoTitle.textContent = pinData[pinId].name;
+      if (mapInfoDesc) mapInfoDesc.textContent = pinData[pinId].desc;
+    }
+  });
+}
+
+function initLanguage() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const known = saved && (i18n[saved] || window.MYCELIUM_LANGS?.has(saved));
+  setLanguage(known ? saved : DEFAULT_LANG);
+  // The language dialog (language-picker.js) owns #langToggleBtn and the list of languages.
+}
+
+const wrapper = document.querySelector(".sliderWrapper");
+const menuItems = document.querySelectorAll(".menuItem");
+
+(function initLoadingScreen() {
+  document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+  }, { once: true });
+
+  // 语言 / Chat 按钮与 Explore & Choose location 同步出现（intro actions / skip / done）
+  function showChromeControls() {
+    document.body.classList.add('chrome-ready');
+    const langSwitcher = document.querySelector('.lang-switcher-wrap');
+    if (langSwitcher) langSwitcher.classList.add('show');
+  }
+
+  document.addEventListener('mycelium:chrome-ready', showChromeControls, { once: true });
+  // 兜底：intro 完成或 60s 后仍未触发时强制显示，避免控件永久隐藏
+  document.addEventListener('mycelium:hero-intro-complete', showChromeControls, { once: true });
+  window.setTimeout(showChromeControls, 60000);
+})();
+
+function scrollPageToElement(element, options = {}) {
+  if (!element) return;
+  if (window.MYCELIUM_LENIS) {
+    window.MYCELIUM_LENIS.scrollTo(element, { offset: options.block === "nearest" ? -16 : -8, duration: 0.9 });
+    return;
+  }
+  element.scrollIntoView(options);
+}
+
+function getSliderCenterTarget() {
+  const slider = document.querySelector('.slider');
+  if (!slider) return 0;
+  const sliderTopToPage = slider.getBoundingClientRect().top + window.scrollY;
+  const sliderHeight = slider.offsetHeight;
+  const viewportHeight = window.innerHeight;
+  return Math.max(0, sliderTopToPage + (sliderHeight / 2) - (viewportHeight / 2));
+}
+
+function scrollToSlider() {
+  const targetScroll = getSliderCenterTarget();
+  if (window.MYCELIUM_LENIS) window.MYCELIUM_LENIS.scrollTo(targetScroll, { duration: 0.9 });
+  else window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+}
+
+function scrollToNav() {
+  scrollToSlider();
+}
+// window.scrollToNav is defined once, in hero-sequence.js (it knows the pinned hero geometry).
+
+function initApp() {
+  initLanguage();
+  const activeCountryCode = window.MYCELIUM_COUNTRY || "MY_PP";
+  let regionServices = null;
+  let regionFaqs = null;
+  let regionFacilities = [];
+  let regionEvents = [];
+
+// =========================================================================
+  // 导航栏滚动收缩（Shrink on Scroll）核心监听
+  // =========================================================================
+  const navEl = document.getElementById("nav");
+  const navToggle = document.getElementById("navToggle");
+  const sliderEl = document.querySelector(".slider");
+
+  if (navEl) {
+    // 移动端汉堡菜单切换
+    if (navToggle) {
+      navToggle.addEventListener("click", () => {
+        const open = !navEl.classList.contains("nav-open");
+        navEl.classList.toggle("nav-open", open);
+        navToggle.setAttribute("aria-expanded", String(open));
+      });
+    }
+
+    // 滚动收缩阈值计算函数
+    const handleNavShrinkOnScroll = () => {
+      if (!sliderEl) {
+        navEl.classList.toggle("is-shrunk", window.scrollY > 100);
+        return;
+      }
+
+      // 获取 slider（menuitem屏）顶部相对于视口的距离
+      const sliderRect = sliderEl.getBoundingClientRect();
+      
+      // 当 slider 的上半部分已经被向上滚出视口（用户深入下方内容）时触发收缩
+      // 当用户滚回 slider 时，自动恢复完整尺寸
+      const shouldShrink = sliderRect.top < -80;
+      navEl.classList.toggle("is-shrunk", shouldShrink);
+      syncLocationButtonMode();
+    };
+
+    // While the nav is condensed, the city button is only an information label.
+    const locationSwitcher = document.getElementById("countrySwitcher");
+    const syncLocationButtonMode = () => {
+      if (!locationSwitcher) return;
+      const condensed = navEl.classList.contains("is-shrunk");
+      locationSwitcher.setAttribute("aria-disabled", String(condensed));
+      if (condensed) locationSwitcher.title = t("ui.locationScrollUp");
+      else locationSwitcher.removeAttribute("title");
+    };
+    // Capture phase: runs before country-selector.js opens the picker. In the condensed state a click
+    // only scrolls back up until the full nav (with the real "choose location" button) is restored.
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest && event.target.closest("#countrySwitcher");
+      if (!trigger || !navEl.classList.contains("is-shrunk")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof window.scrollToNav === "function") window.scrollToNav();
+    }, true);
+
+    // Condensed nav on wide screens is ONE row (logo | menu | tools). Long labels (Spanish, Malay, Tamil...) can need more room
+    // than the screen has, so the row first tightens the menu a step, and only if it still does not fit it falls back to two rows.
+    // Nothing is ever pushed off screen, in any language.
+    const navTools = navEl.querySelector(".nav-tools");
+    const fitCondensedNav = () => {
+      navEl.removeAttribute("data-nav-fit");
+      if (!navEl.classList.contains("is-shrunk") || !window.matchMedia("(min-width: 1200px)").matches || !navTools) return;
+      const overflows = () => navTools.getBoundingClientRect().right > window.innerWidth - 12 || navEl.scrollWidth > window.innerWidth + 1;
+      for (const level of ["0", "1"]) {
+        navEl.dataset.navFit = level;
+        if (!overflows()) return;
+      }
+      navEl.dataset.navFit = "stack";
+    };
+    let navWasShrunk = navEl.classList.contains("is-shrunk");
+    let navFitTimer = 0;
+    const scheduleNavFit = () => { clearTimeout(navFitTimer); navFitTimer = setTimeout(fitCondensedNav, 60); };
+    const onNavScroll = () => {
+      handleNavShrinkOnScroll();
+      const shrunk = navEl.classList.contains("is-shrunk");
+      if (shrunk !== navWasShrunk) { navWasShrunk = shrunk; fitCondensedNav(); }
+    };
+    window.addEventListener("scroll", onNavScroll, { passive: true });
+    window.addEventListener("resize", () => { handleNavShrinkOnScroll(); scheduleNavFit(); }, { passive: true });
+    window.addEventListener("mycelium:languagechange", scheduleNavFit);
+    if (document.fonts?.ready) document.fonts.ready.then(scheduleNavFit);
+    // 初始化执行一次，防止刷新在页面中段
+    handleNavShrinkOnScroll();
+  }
+  // 苹果风格平滑展开搜索栏交互
+  const searchContainer = document.getElementById("navSearchContainer");
+  const searchTriggerBtn = document.getElementById("searchTriggerBtn");
+  const searchCloseBtn = document.getElementById("searchCloseBtn");
+  const customSearchImg = document.getElementById("customSearchImg");
+
+  if (customSearchImg && customSearchImg.getAttribute("src") && customSearchImg.getAttribute("src").trim() !== "") {
+    customSearchImg.style.display = "block";
+    const svg = searchTriggerBtn?.querySelector(".search-icon-svg");
+    if (svg) svg.style.display = "none";
+  }
+
+  if (searchTriggerBtn && searchContainer) {
+    searchTriggerBtn.addEventListener("click", () => {
+      const isActive = searchContainer.classList.toggle("is-active");
+      searchTriggerBtn.setAttribute("aria-expanded", String(isActive));
+      if (isActive) {
+        setTimeout(() => searchInput?.focus(), 150);
+      }
+    });
+
+    searchCloseBtn?.addEventListener("click", () => {
+      searchContainer.classList.remove("is-active");
+      searchTriggerBtn.setAttribute("aria-expanded", "false");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!searchContainer.contains(e.target)) {
+        searchContainer.classList.remove("is-active");
+        searchTriggerBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && searchContainer.classList.contains("is-active")) {
+        searchContainer.classList.remove("is-active");
+        searchTriggerBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  const products = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }];
+  let currentIndex = 0;
+  const total = products.length;
+
+  document.querySelectorAll(".hero-dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      const index = Number(dot.dataset.index);
+      if (menuItems[index]) menuItems[index].click();
+    });
+  });
+
+  menuItems.forEach((item, index) => {
+    item.addEventListener("click", () => {
+      currentIndex = index;
+      if (navEl) {
+        navEl.classList.remove("nav-open");
+        if (navToggle) navToggle.setAttribute("aria-expanded", "false");
+      }
+      wrapper.style.transform = `translateX(${-100 * index}vw)`;
+      updateActiveMenuItem(index);
+      closeAllSections();
+      scrollToSlider();
+    });
+  });
+    
+  const mapOverlay = document.getElementById("mapOverlay");
+  const openMapBtn = document.getElementById("openMapBtn");
+  const mapCloseBtn = document.getElementById("mapCloseBtn");
+  const mapPins = document.querySelectorAll("#mapOverlay .pin");
+  const mapInfoBox = document.getElementById("mapInfoBox");
+  const mapInfoTitle = document.getElementById("mapInfoTitle");
+  const mapInfoDesc = document.getElementById("mapInfoDesc");
+
+  mapPins.forEach((pin) => {
+    ["pointerenter", "focus", "touchstart"].forEach((type) =>
+  pin.addEventListener(type, () => loadFacilityPhoto(facilityPhotoBase(pin), "high"), { passive: true }));
+    pin.setAttribute("aria-pressed", pin.classList.contains("active") ? "true" : "false");
+    if (pin.dataset.name) pin.setAttribute("aria-label", pin.dataset.name);
+  });
+
+  const setMapOpen = (isOpen) => {
+    document.body.classList.toggle("show-map", isOpen);
+    if (mapOverlay) mapOverlay.setAttribute("aria-hidden", String(!isOpen));
+    if (!isOpen) closeMapDetails();
+    if (isOpen) warmFacilityPhotos(visibleMapPins());
+
+    if (isOpen && mapOverlay) {
+      scrollPageToElement(mapOverlay, { behavior: "smooth", block: "start" });
+      mapCloseBtn?.focus({ preventScroll: true });
+    } else if (!isOpen) {
+      openMapBtn?.focus({ preventScroll: true });
+    }
+  };
+
+  if (openMapBtn && mapOverlay && mapCloseBtn) {
+    openMapBtn.addEventListener("click", () => {
+      setMapOpen(true);
+      setCalendarOpen(false);
+    });
+    mapCloseBtn.addEventListener("click", () => setMapOpen(false));
+  }
+  
+  document
+    .querySelectorAll(".slider .buyButton, .slider .buyButton3, .slider .buyButton5, .slider .buyButton6")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => setMapOpen(false));
+    });
+
+  const announcementOverlay = document.getElementById("announcementOverlay");
+  const openAnnouncementBtn = document.getElementById("openAnnouncementBtn");
+  const announcementCloseBtn = document.getElementById("announcementCloseBtn");
+  const announcementListEl = document.querySelector(".announcementList");
+
+  let announcementData = [];
+
+  // Data lives at countries/{CC}/cities/{CITY}/{collection} (see region-paths.js).
+  const REGION = window.MYCELIUM_REGION_PATHS;
+  const isMalaysiaSite = String(activeCountryCode).toUpperCase().startsWith("MY");
+  function locationCollection(collectionName) {
+    return REGION.ref(window.db, activeCountryCode, collectionName);
+  }
+
+  async function loadRegionalFAQContent() {
+    try {
+      const snapshot = await REGION.readCollection(window.db, activeCountryCode, "faqs");
+      regionFaqs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.warn(`[${activeCountryCode}] FAQ records could not load; using the built-in fallback where available.`, error);
+      regionFaqs = null;
+    }
+    renderFAQItems();
+  }
+
+  async function loadRegionalDirectoryContent() {
+    if (isDefaultMalaysia(activeCountryCode)) return;
+    // Pins come from the site config, so they appear even if the database is empty or unreachable.
+    applyRegionalMapFacilities([]);
+    try {
+      const database = window.db;
+      const [serviceSnapshot, facilitySnapshot, eventSnapshot, communityRulesDoc] = await Promise.all([
+        REGION.readCollection(database, activeCountryCode, "services"),
+        REGION.readCollection(database, activeCountryCode, "facilities"),
+        REGION.readCollection(database, activeCountryCode, "events"),
+        REGION.readDoc(database, activeCountryCode, "rules", "community"),
+      ]);
+      regionServices = serviceSnapshot.docs.map(doc => doc.data());
+      regionFacilities = facilitySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      regionEvents = eventSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+      window.MYCELIUM_REGION_RULES = communityRulesDoc.exists ? communityRulesDoc.data() : null;
+      renderServiceCards();
+      renderFAQItems();
+      applyRegionalMapFacilities(regionFacilities);
+      renderRegionalVolunteerCards();
+    } catch (error) {
+      console.error(`[${activeCountryCode}] regional directory could not load:`, error);
+    }
+  }
+
+  // Built-in labels so every Portland pin works even before its Firestore document exists.
+  const REGIONAL_PIN_FALLBACK = {
+    "community-garden": { name_en: "Community Garden", description_en: "Raised beds, shared tools and a seasonal planting calendar." },
+    "fitness-center": { name_en: "Fitness Center", description_en: "Cardio, free weights and a stretching area." },
+    "coworking-lounge": { name_en: "Co-working Lounge", description_en: "Quiet desks, fast Wi-Fi and two bookable meeting rooms." },
+    "bike-hub": { name_en: "Bike Hub", description_en: "Secure bike storage, a repair stand and an air pump." },
+    "ev-charging": { name_en: "EV Charging Stations", description_en: "Level 2 chargers in the visitor and resident parking areas." },
+    "recycling-compost": { name_en: "Recycling & Compost Center", description_en: "Sorted bins for recycling, food scraps and glass." },
+    "walking-trail": { name_en: "Woodland Walking Trail", description_en: "A loop through native plantings with benches along the way." },
+    clubhouse: { name_en: "Clubhouse", description_en: "Shared kitchen, lounge and event hall for resident gatherings." },
+  };
+
+  function applyRegionalMapFacilities(facilities) {
+    const positions = window.MYCELIUM_COUNTRY_CONFIG?.mapPins;
+    // Sites without a custom site plan (e.g. Johor Bahru) use the default pins.
+    if (!positions) {
+      document.querySelectorAll("#mapOverlay .pin").forEach((pin) => {
+        pin.hidden = false;
+        pin.style.display = "";
+      });
+      updateMapPinsLanguage();
+      return;
+    }
+
+    const assignments = {
+      "community-garden": ["basketball", "communityGarden"],
+      "fitness-center": ["gym", "fitnessCenter"],
+      "coworking-lounge": ["pool", "coWorkingLounge"],
+      "bike-hub": ["tennis", "bikeHub"],
+      "ev-charging": ["parking", "evCharging"],
+      "recycling-compost": ["recycle2", "recyclingCompost"],
+      "walking-trail": ["park", "walkingTrail"],
+      clubhouse: ["clubhouse", "clubhouse"],
+    };
+    const byId = new Map((facilities || []).map((facility) => [facility.id, facility]));
+    const visibleIds = new Set();
+    Object.entries(assignments).forEach(([facilityId, [pinId, positionKey]]) => {
+      const position = positions[positionKey];
+      const pin = document.querySelector(`#mapOverlay .pin[data-pin-id="${pinId}"]`);
+      if (!pin || !position) return;
+      const facility = { ...(REGIONAL_PIN_FALLBACK[facilityId] || {}), ...(byId.get(facilityId) || {}) };
+      visibleIds.add(pinId);
+      pin.hidden = false;
+      pin.style.display = "";
+      pin.style.left = `${position.x}%`;
+      pin.style.top = `${position.y}%`;
+      pin.dataset.name = facility[`name_${currentLang}`] || facility.name_en || facilityId;
+      pin.dataset.desc = facility[`description_${currentLang}`] || facility.description_en || "";
+      pin.dataset.photo = facility.photoUrl || `./img/Facilities/${facilityId}`;
+      pin.setAttribute("aria-label", pin.dataset.name);
+    });
+    document.querySelectorAll("#mapOverlay .pin").forEach((pin) => {
+      pin.hidden = !visibleIds.has(pin.dataset.pinId);
+      pin.style.display = pin.hidden ? "none" : "";
+    });
+  }
+
+  window.addEventListener("mycelium:languagechange", () => {
+    renderServiceCards();
+    renderFAQItems();
+    renderVolunteerActivities();
+    if (!isDefaultMalaysia(activeCountryCode)) {
+      if (regionFacilities.length) applyRegionalMapFacilities(regionFacilities);
+      if (regionEvents.length) renderRegionalVolunteerCards();
+    } else {
+      updateMapPinsLanguage();
+    }
+  });
+
+  // 同一文件夹 ./img/volunteer/ 下的视频；按卡片文案语义匹配，Firestore 可写 videoUrl 覆盖
+  const VOLUNTEER_VIDEO_DIR = "./img/volunteer/";
+  const VOLUNTEER_VIDEO_FALLBACK = [
+    `${VOLUNTEER_VIDEO_DIR}tree.mp4`,
+    `${VOLUNTEER_VIDEO_DIR}clean.mp4`,
+    `${VOLUNTEER_VIDEO_DIR}run.mp4`,
+  ];
+
+  function resolveVolunteerVideoSrc(event, index) {
+    if (!event) return VOLUNTEER_VIDEO_FALLBACK[index % VOLUNTEER_VIDEO_FALLBACK.length];
+    const explicit = event.videoUrl || event.video || event.mediaUrl || "";
+    if (explicit) return explicit;
+
+    const hay = [
+      event.title_en, event.title_es, event["title_zh-CN"], event.title_ms, event.title_ta,
+      event.description_en, event.description_es, event["description_zh-CN"], event.description_ms, event.description_ta,
+      event.id,
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    // 按内容语义选片（clean/run 可复用到相近主题）
+    if (/garden|plant|tree|seed|bulb|cutting|horticult|绿|植树|花园|园艺/.test(hay)) {
+      return `${VOLUNTEER_VIDEO_DIR}garden.mp4`;
+    }
+    if (/food|drive|potluck|meal|thanksgiving|pantry|捐|食物|聚餐/.test(hay)) {
+      return `${VOLUNTEER_VIDEO_DIR}food.mp4`;
+    }
+    if (/book|library|read|literacy|书|阅读|图书馆/.test(hay)) {
+      return `${VOLUNTEER_VIDEO_DIR}book.mp4`;
+    }
+    if (/wellness|yoga|health|fitness|mental|冥想|健康|瑜伽/.test(hay)) {
+      return `${VOLUNTEER_VIDEO_DIR}wellness.mp4`;
+    }
+    if (/clean|cleanup|tidy|litter|rubbish|清洁|清理/.test(hay)) {
+      return `${VOLUNTEER_VIDEO_DIR}clean.mp4`;
+    }
+    if (/run|race|marshal|5k|marathon|跑|赛事/.test(hay)) {
+      return `${VOLUNTEER_VIDEO_DIR}run.mp4`;
+    }
+    // 默认按卡片位：0 garden、1 run、2 food（覆盖常见 US 前三条）
+    const byIndex = [
+      `${VOLUNTEER_VIDEO_DIR}garden.mp4`,
+      `${VOLUNTEER_VIDEO_DIR}run.mp4`,
+      `${VOLUNTEER_VIDEO_DIR}food.mp4`,
+    ];
+    return byIndex[index] || VOLUNTEER_VIDEO_FALLBACK[index % VOLUNTEER_VIDEO_FALLBACK.length];
+  }
+
+  function applyVolunteerVideo(card, src) {
+    const video = card.querySelector("video.volunteerVideo, video.volunteerImg, video");
+    if (!video || !src) return;
+    const current = video.getAttribute("src") || video.currentSrc || "";
+    // 同源相对路径归一后再比，避免无意义 reload
+    const norm = (s) => String(s).replace(/^\.\//, "").split("?")[0];
+    if (norm(current) === norm(src)) return;
+    try { video.pause(); } catch (e) {}
+    video.setAttribute("src", src);
+    video.load();
+  }
+
+  // Venue shown on a regional volunteer card, best source first:
+  // 1) an explicit location field on the event, 2) a "Location: ..." line or "Meet at ..." phrase in the
+  // description, 3) the city name of the active site (never a hard-coded city).
+  function volunteerEventPlace(event) {
+    const explicit = event[`location_${currentLang}`] || event.location_en || event.location || event.venue;
+    if (explicit) return String(explicit).trim();
+    const text = String(event[`description_${currentLang}`] || event.description_en || "");
+    const labelled = text.match(/(?:^|\n)\s*(?:location|venue|assembly point|地点|集合点|lokasi|lugar)\s*[:：]\s*(.+)/i);
+    if (labelled) return labelled[1].trim();
+    const phrase = text.match(/(?:meet(?:ing)? (?:at|point:?)|punto de encuentro\s*:|集合地点\s*[：:])\s*([^.。\n]+)/i);
+    if (phrase) return phrase[1].replace(/^the\s+/i, "").trim().replace(/^./, (c) => c.toUpperCase());
+    const siteLabel = window.MYCELIUM_REGION_PATHS?.SITES?.[activeCountryCode]?.label || "";
+    return siteLabel.split("·").pop().trim();
+  }
+
+  function renderRegionalVolunteerCards() {
+    if (volunteerActivities.length) return; // admin-managed cards take over (renderVolunteerActivities)
+    if (isDefaultMalaysia(activeCountryCode) || !regionEvents.length) return;
+    const locale = ({ en: "en-US", es: "es-US", "zh-CN": "zh-CN" })[currentLang] || "en-US";
+    const bringText = {
+      en: "See the event details and contact management if you need accommodations.",
+      es: "Consulta los detalles del evento y contacta con la administración si necesitas apoyo.",
+      "zh-CN": "请查看活动详情；如需协助，请联系物业办公室。",
+    }[currentLang] || "See the event details and contact management if you need accommodations.";
+    document.querySelectorAll(".volunteerCard").forEach((card, index) => {
+      const event = regionEvents[index];
+      if (!event) { card.hidden = true; return; }
+      card.hidden = false;
+      const title = event[`title_${currentLang}`] || event.title_en || event.id;
+      const description = event[`description_${currentLang}`] || event.description_en || "";
+      const [year, month, day] = String(event.date || "").split("-").map(Number);
+      const parsedDate = year && month && day ? new Date(year, month - 1, day, 12) : null;
+      const dateText = parsedDate && !Number.isNaN(parsedDate.getTime())
+        ? new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(parsedDate)
+        : event.date || "";
+      card.querySelector(".volunteerCardTitle").textContent = title;
+      card.querySelector(".volunteerCardDate").textContent = [dateText, volunteerEventPlace(event)].filter(Boolean).join(" · ");
+      card.querySelector(".volunteerCardDesc").textContent = description;
+      card.querySelector(".volunteerCardBring").textContent = bringText;
+      const button = card.querySelector(".volunteerRegisterBtn");
+      button.dataset.activity = title;
+      button.textContent = t("volunteer.registerNow");
+      const imgOrVideo = card.querySelector(".volunteerImg");
+      if (imgOrVideo) imgOrVideo.alt = title;
+
+      // 视频：优先 event.videoUrl，否则按标题/简介语义匹配同目录 mp4
+      applyVolunteerVideo(card, resolveVolunteerVideoSrc(event, index));
+    });
+
+    // 若 strip 已初始化，刷新当前可见卡的播放状态
+    if (window.MYCELIUM_VOLUNTEER_STRIP && typeof window.MYCELIUM_VOLUNTEER_STRIP.refreshVideos === "function") {
+      window.MYCELIUM_VOLUNTEER_STRIP.refreshVideos();
+    }
+  }
+
+  // ---- Admin-managed volunteer cards: {region}/volunteer_activities -------------------------------
+  // Written from /admin/volunteer-cards. When the collection is empty the built-in cards stay as they are.
+  const VOLUNTEER_MAX_CARDS = 12;
+  const VOLUNTEER_BRING_LABEL = {
+    en: "What to bring:", ms: "Perlu dibawa:", ta: "கொண்டு வர வேண்டியவை:",
+    "zh-CN": "需携带：", es: "Qué llevar:",
+  };
+  let volunteerActivities = [];
+
+  function volunteerText(activity, key) {
+    return String(activity[`${key}_${currentLang}`] || activity[`${key}_en`] || "").trim();
+  }
+
+  function volunteerDateLine(activity) {
+    const [year, month, day] = String(activity.date || "").split("-").map(Number);
+    const parsed = year && month && day ? new Date(year, month - 1, day, 12) : null;
+    let dateText = activity.date || "";
+    if (parsed && !Number.isNaN(parsed.getTime())) {
+      try { dateText = new Intl.DateTimeFormat(currentLang, { dateStyle: "long" }).format(parsed); }
+      catch (error) { dateText = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(parsed); }
+    }
+    return [dateText, String(activity.time || "").trim(), volunteerText(activity, "location")].filter(Boolean).join(" · ");
+  }
+
+  function renderVolunteerActivities() {
+    const track = document.getElementById("volunteerTrack");
+    if (!track || !volunteerActivities.length) return;
+    let cards = Array.from(track.querySelectorAll(".volunteerCard"));
+    if (!cards.length) return;
+    const template = cards[0];
+    while (cards.length < volunteerActivities.length) {
+      const clone = template.cloneNode(true);
+      clone.dataset.real = String(cards.length);
+      track.appendChild(clone);
+      cards.push(clone);
+    }
+    cards.forEach((card, index) => {
+      const activity = volunteerActivities[index];
+      if (!activity) { card.hidden = true; return; }
+      card.hidden = false;
+      // These nodes now come from the database, so the static translation keys must not overwrite them.
+      card.querySelectorAll("[data-i18n]").forEach((node) => node.removeAttribute("data-i18n"));
+      const title = volunteerText(activity, "title") || activity.id;
+      const bring = volunteerText(activity, "bring");
+      card.querySelector(".volunteerCardTitle").textContent = title;
+      card.querySelector(".volunteerCardDate").textContent = volunteerDateLine(activity);
+      card.querySelector(".volunteerCardDesc").textContent = volunteerText(activity, "description");
+      const bringNode = card.querySelector(".volunteerCardBring");
+      bringNode.textContent = "";
+      bringNode.hidden = !bring;
+      if (bring) {
+        const label = document.createElement("strong");
+        label.textContent = VOLUNTEER_BRING_LABEL[currentLang] || VOLUNTEER_BRING_LABEL.en;
+        bringNode.append(label, ` ${bring}`);
+      }
+      const button = card.querySelector(".volunteerRegisterBtn");
+      button.dataset.activity = title;
+      button.textContent = t("volunteer.registerNow");
+      const media = card.querySelector(".volunteerImg");
+      if (media) media.setAttribute("aria-label", title);
+      applyVolunteerVideo(card, resolveVolunteerVideoSrc(activity, index));
+    });
+    if (window.MYCELIUM_VOLUNTEER_STRIP?.refreshVideos) window.MYCELIUM_VOLUNTEER_STRIP.refreshVideos();
+  }
+
+  async function loadVolunteerActivities() {
+    if (!window.db) return;
+    try {
+      const snapshot = await REGION.readCollection(window.db, activeCountryCode, "volunteer_activities");
+      volunteerActivities = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((activity) => activity.isPublished !== false)
+        .sort((a, b) => (Number(a.order) || 999) - (Number(b.order) || 999)
+          || String(a.date || "").localeCompare(String(b.date || "")))
+        .slice(0, VOLUNTEER_MAX_CARDS);
+      renderVolunteerActivities();
+    } catch (error) {
+      console.error(`[${activeCountryCode}] volunteer activities could not load:`, error);
+    }
+  }
+
+  async function loadAnnouncementsFromFirebase() {
+    try {
+      const snapshot = await REGION.readCollection(window.db, activeCountryCode, "announcements");
+      announcementData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => {
+          // The city path already scopes the records. Only the OLD shared root collection needs filtering.
+          if (!snapshot.legacy || !isDefaultMalaysia(activeCountryCode)) return true;
+          const itemCode = String(item.countryCode || "").toUpperCase();
+          return !itemCode || itemCode === "MY" || itemCode === "MY_PP";
+        })
+        .filter(item => item.isPublished !== false)
+        .sort((a, b) => (new Date(b.date || 0).getTime() || 0) - (new Date(a.date || 0).getTime() || 0));
+      renderAnnouncementList("all");
+    } catch (err) {
+      console.error("Failed to load announcements:", err);
+    }
+  }
+
+// =========================================================================
+  // 外部公告列表 · 编辑目录式渲染引擎
+  // =========================================================================
+
+  // 格式化左侧大号时间索引（年份 + 月日）
+  function parseIndexDate(rawDateStr) {
+    if (!rawDateStr) return { year: "", dayMonth: "" };
+    const d = new Date(rawDateStr.includes("T") ? rawDateStr : `${rawDateStr}T00:00:00`);
+    if (Number.isNaN(d.getTime())) {
+      const yearMatch = rawDateStr.match(/(\d{4})/);
+      const year = yearMatch ? yearMatch[1] : "";
+      const dayMonth = rawDateStr.replace(/\d{4}/, "").replace(/[-/]/g, " ").trim().toUpperCase();
+      return { year, dayMonth };
+    }
+    const year = String(d.getFullYear());
+    let month = "";
+    try { month = new Intl.DateTimeFormat(currentLang, { month: "short" }).format(d).toLocaleUpperCase(currentLang); }
+    catch (error) { month = new Intl.DateTimeFormat("en-US", { month: "short" }).format(d).toUpperCase(); }
+    const day = String(d.getDate()).padStart(2, "0");
+    return { year, dayMonth: `${day} ${month}` };
+  }
+
+  // 提取副标题信息行（日期 · 地点 / 时间）
+  function extractSubMetaRow(item, currentLang) {
+    const rawContent = item[`fullContent_${currentLang}`] || item.fullContent_en || item.fullContent || "";
+    const displayDate = item.displayDate || item.date || "";
+    
+    let time = "";
+    let place = "";
+
+    const lines = String(rawContent).split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      const timeMatch = trimmed.match(/^(?:time|时间|masa|horario)\s*[:：]\s*(.+)/i);
+      const placeMatch = trimmed.match(/^(?:location|venue|assembly point|地点|集合点|lokasi|lugar)\s*[:：]\s*(.+)/i);
+      if (timeMatch && !time) time = timeMatch[1].trim();
+      if (placeMatch && !place) place = placeMatch[1].trim();
+      if (time && place) break;
+    }
+
+    const parts = [displayDate.toUpperCase()];
+    if (place) parts.push(place.toUpperCase());
+    if (time) parts.push(time.toUpperCase());
+
+    // 默认回退保障信息行格式完整
+    if (parts.length === 1) {
+      const catLabel = String(item.category || "NOTICE").toUpperCase();
+      parts.push(`${catLabel} BULLETIN`);
+    }
+
+    return parts.join(" · ");
+  }
+
+  function renderAnnouncementList(category) {
+    if (!announcementListEl) return;
+    announcementListEl.innerHTML = "";
+
+    const filtered = category === "all" 
+      ? announcementData 
+      : announcementData.filter(item => String(item.category || "").toLowerCase() === category.toLowerCase());
+
+    if (!filtered.length) {
+      announcementListEl.innerHTML = `
+        <li class="aci-empty">
+          <p>${t("common.searchNoResult") || "No announcements found in this category."}</p>
+        </li>
+      `;
+      return;
+    }
+
+    filtered.forEach((item, filteredIndex) => {
+      // 获取该项在原始数组中的真实索引，确保弹窗数据完全对齐
+      const realIndex = announcementData.indexOf(item);
+      const rawCategory = String(item.category || "community").toLowerCase();
+      const catKey = ["community", "emergency", "maintenance", "events"].includes(rawCategory) ? rawCategory : "community";
+
+      const title = item[`title_${currentLang}`] || item.title_en || item.title || "";
+      const cleanTitle = title.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
+
+      const shortText = item[`shortText_${currentLang}`] || item.shortText_en || item.shortText || "";
+      const rawDate = item.displayDate || item.date || "";
+      const { year, dayMonth } = parseIndexDate(rawDate);
+      const metaRowText = extractSubMetaRow(item, currentLang);
+      const isLatest = filteredIndex === 0;
+
+      const li = document.createElement("li");
+      li.className = "announcement-card-item";
+      li.dataset.category = catKey;
+      if (isLatest) li.classList.add("is-latest");
+
+      li.innerHTML = `
+        <!-- 左侧时间索引区 -->
+        <div class="aci-timeline">
+          <div class="aci-date-box">
+            <span class="aci-year">${year}</span>
+            <span class="aci-daymonth">${dayMonth}</span>
+          </div>
+          <div class="aci-node-track" aria-hidden="true">
+            <span class="aci-node-dot"></span>
+            <span class="aci-node-line"></span>
+          </div>
+        </div>
+
+        <!-- 右侧目录卡片主体 -->
+        <article class="aci-content-card" tabindex="0" role="button" aria-label="${cleanTitle}">
+          <div class="aci-title-row">
+            <span class="aci-cat-bar" aria-hidden="true"></span>
+            <span class="aci-cat-tag">[${catKey.toUpperCase()}]</span>
+            <h3 class="aci-card-title">${cleanTitle}</h3>
+          </div>
+
+          <p class="aci-meta-line">${metaRowText}</p>
+
+          <p class="aci-summary">${shortText}</p>
+
+          <div class="aci-action-row">
+            <span class="aci-read-more">
+              <span>${t("common.readMore") || "Read More"}</span>
+              <span class="aci-arrow" aria-hidden="true">→</span>
+            </span>
+          </div>
+        </article>
+      `;
+
+      // 绑定点击与键盘 Enter 唤起编辑杂志风详情弹窗
+      const cardEl = li.querySelector(".aci-content-card");
+      const openDetail = () => openAnnouncementDetail(realIndex);
+
+      cardEl.addEventListener("click", openDetail);
+      cardEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openDetail();
+        }
+      });
+
+      announcementListEl.appendChild(li);
+    });
+  }
+  const setAnnouncementOpen = (isOpen) => {
+    document.body.classList.toggle("show-announcement", isOpen);
+    if (announcementOverlay) announcementOverlay.setAttribute("aria-hidden", String(!isOpen));
+
+    if (isOpen && announcementOverlay) {
+      scrollPageToElement(announcementOverlay, { behavior: "smooth", block: "start" });
+      loadAnnouncementsFromFirebase();
+    }
+  };
+
+  if (openAnnouncementBtn && announcementOverlay && announcementCloseBtn) {
+    openAnnouncementBtn.addEventListener("click", () => {
+      setMapOpen(false);
+      setCalendarOpen(false);
+      setServiceOpen(false);
+      setAnnouncementOpen(true);
+    });
+    announcementCloseBtn.addEventListener("click", () => setAnnouncementOpen(false));
+  }
+
+  document
+    .querySelectorAll(".slider .buyButton2, .slider .buyButton3, .slider .buyButton4, .slider .buyButton5, .slider .buyButton6")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => setAnnouncementOpen(false));
+    });
+
+  const announcementTabs = document.querySelectorAll(".announcementTab");
+  announcementTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      announcementTabs.forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      const category = tab.dataset.category;
+      renderAnnouncementList(category);
+    });
+  });
+
+// =========================================================================
+  // 公告弹窗 · 编辑杂志风渲染逻辑
+  // =========================================================================
+  const announcementModal = document.getElementById("announcementDetailModal");
+  const announcementModalCard = document.getElementById("announcementModalCard");
+  const announcementModalTitle = document.getElementById("announcementModalTitle");
+  const announcementModalContent = document.getElementById("announcementModalContent");
+  const announcementModalClose = document.querySelector(".announcement-modal-close");
+  const amcMainCloseBtn = document.getElementById("amcMainCloseBtn");
+  const amcBadgeIcon = document.getElementById("amcBadgeIcon");
+  const amcCategoryLabel = document.getElementById("amcCategoryLabel");
+  const amcPublishDate = document.getElementById("amcPublishDate");
+  const amcKeyFacts = document.getElementById("amcKeyFacts");
+  const amcSalutation = document.getElementById("amcSalutation");
+  const amcSignoff = document.getElementById("amcSignoff");
+  const amcActionsLeft = document.getElementById("amcActionsLeft");
+
+  // 4 类公告极简线性 SVG 图标
+  const CATEGORY_ICONS = {
+    community: `<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+    emergency: `<svg viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+    maintenance: `<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`,
+    events: `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`
+  };
+
+  // 多语言称谓与落款映射
+  const LETTER_I18N = {
+    en: { salutation: "Dear Residents,", signoff: "Management Team", addToCal: "Add to Calendar" },
+    "zh-CN": { salutation: "尊敬的居民：", signoff: "社区管理处", addToCal: "添加到日历" },
+    ms: { salutation: "Kepada Penduduk Sekalian,", signoff: "Pihak Pengurusan", addToCal: "Tambah ke Kalendar" },
+    es: { salutation: "Estimados residentes:", signoff: "Equipo de administración", addToCal: "Añadir al calendario" },
+    ta: { salutation: "அன்புள்ள குடியிருப்பாளர்களே,", signoff: "நிர்வாகக் குழு", addToCal: "நாட்காட்டியில் சேர்" }
+  };
+
+  // 辅助函数：从富文本/长文本中自动抽离常见时间、地点关键行，提升阅读效率
+  function extractKeyFacts(content, rawDate) {
+    const facts = [];
+    if (rawDate) {
+      facts.push({ label: t("announcement.factDate"), value: rawDate });
+    }
+
+    const lines = String(content || "").split("\n");
+    const cleanLines = [];
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      const timeMatch = trimmed.match(/^(?:time|时间|masa|horario)\s*[:：]\s*(.+)/i);
+      const placeMatch = trimmed.match(/^(?:location|venue|assembly point|地点|集合点|lokasi|lugar)\s*[:：]\s*(.+)/i);
+
+      if (timeMatch) {
+        facts.push({ label: t("announcement.factTime"), value: timeMatch[1] });
+      } else if (placeMatch) {
+        facts.push({ label: t("announcement.factLocation"), value: placeMatch[1] });
+      } else {
+        cleanLines.push(line);
+      }
+    });
+
+    return {
+      facts,
+      filteredContent: cleanLines.join("\n").trim()
+    };
+  }
+
+  function openAnnouncementDetail(index) {
+    const detail = announcementData[index];
+    if (!detail || !announcementModal) return;
+
+    const rawCategory = String(detail.category || "community").toLowerCase();
+    const category = ["community", "emergency", "maintenance", "events"].includes(rawCategory) ? rawCategory : "community";
+    
+    // 1. 设置分类主题色变量
+    if (announcementModalCard) {
+      announcementModalCard.dataset.category = category;
+    }
+
+    // 2. 填充顶部信息栏
+    if (amcBadgeIcon) amcBadgeIcon.innerHTML = CATEGORY_ICONS[category] || CATEGORY_ICONS.community;
+    const categoryTranslationKey = ({ community: "tabCommunity", emergency: "tabEmergency", maintenance: "tabMaintenance", events: "tabEvents" })[category] || "tabCommunity";
+    if (amcCategoryLabel) amcCategoryLabel.textContent = String(t(`announcement.${categoryTranslationKey}`)).toLocaleUpperCase(currentLang);
+    if (amcPublishDate) amcPublishDate.textContent = detail.displayDate || detail.date || "";
+
+    // 3. 标题处理（移除 emoji，保持纯粹文字）
+    const rawTitle = detail[`title_${currentLang}`] || detail.title_en || detail.title || "";
+    const cleanTitle = rawTitle.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
+    if (announcementModalTitle) announcementModalTitle.textContent = cleanTitle;
+
+    // 4. 关键信息块提取与正文信函排版
+    const rawContent = detail[`fullContent_${currentLang}`] || detail.fullContent_en || detail.fullContent || "";
+    const { facts, filteredContent } = extractKeyFacts(rawContent, detail.displayDate || detail.date);
+
+    if (amcKeyFacts) {
+      if (facts.length > 0) {
+        amcKeyFacts.hidden = false;
+        amcKeyFacts.innerHTML = facts.map(f => `
+          <div class="amc-fact-row">
+            <span class="amc-fact-dot" aria-hidden="true"></span>
+            <dt class="amc-fact-label">${f.label}</dt>
+            <dd class="amc-fact-val">${f.value}</dd>
+          </div>
+        `).join("");
+      } else {
+        amcKeyFacts.hidden = true;
+        amcKeyFacts.innerHTML = "";
+      }
+    }
+
+    const i18nLetter = LETTER_I18N[currentLang] || LETTER_I18N.en;
+    if (amcSalutation) amcSalutation.textContent = i18nLetter.salutation;
+    if (amcSignoff) amcSignoff.textContent = i18nLetter.signoff;
+
+    // 正文段落化渲染
+    if (announcementModalContent) {
+      const paragraphs = filteredContent.split(/\n\s*\n/).filter(Boolean);
+      if (paragraphs.length > 0) {
+        announcementModalContent.innerHTML = paragraphs.map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+      } else {
+        announcementModalContent.innerHTML = `<p>${filteredContent.replace(/\n/g, "<br>")}</p>`;
+      }
+    }
+
+    // 5. 底部操作栏（活动类可选日历操作）
+    if (amcActionsLeft) {
+      if (category === "events") {
+        amcActionsLeft.innerHTML = `<button type="button" class="amc-calendar-btn" id="amcCalendarBtn">${i18nLetter.addToCal}</button>`;
+        document.getElementById("amcCalendarBtn")?.addEventListener("click", () => {
+          closeAnnouncementDetail();
+          document.getElementById("openCalendarBtn")?.click();
+        });
+      } else {
+        amcActionsLeft.innerHTML = "";
+      }
+    }
+
+    // 展现弹窗
+    announcementModal.classList.add("active");
+    announcementModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden"; // 锁定主页面滚动
+    amcMainCloseBtn?.focus();
+  }
+
+  function closeAnnouncementDetail() {
+    if (!announcementModal) return;
+    announcementModal.classList.remove("active");
+    announcementModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = ""; // 恢复主页面滚动
+  }
+
+  // 关闭绑定
+  if (announcementModalClose) announcementModalClose.addEventListener("click", closeAnnouncementDetail);
+  if (amcMainCloseBtn) amcMainCloseBtn.addEventListener("click", closeAnnouncementDetail);
+  if (announcementModal) {
+    announcementModal.addEventListener("click", (e) => {
+      if (e.target === announcementModal) closeAnnouncementDetail();
+    });
+  }
+
+  // Esc 键通用退出
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && announcementModal?.classList.contains("active")) {
+      closeAnnouncementDetail();
+    }
+  });
+  const calendarOverlay = document.getElementById("calendarOverlay");
+  const openCalendarBtn = document.getElementById("openCalendarBtn");
+  const calendarCloseBtn = document.getElementById("calendarCloseBtn");
+  const calendarBody = document.getElementById("calendarBody");
+  const calendarInfoHint = document.getElementById("calendarInfoHint");
+  const calendarInfoTitle = document.getElementById("calendarInfoTitle");
+  const calendarInfoDesc = document.getElementById("calendarInfoDesc");
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCenfhVQjmGSVOflXL0wOqK9GqUCAzfL34",
+    authDomain: "mycelium-residence.firebaseapp.com",
+    projectId: "mycelium-residence",
+    storageBucket: "mycelium-residence.firebasestorage.app",
+    messagingSenderId: "982178911104",
+    appId: "1:982178911104:web:948912553056b2ea162765"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+  window.db = db;
+  window.firebase = firebase;
+
+  const READ_EVENTS_KEY = "calendar_read_event_ids";
+  function getReadEventIds() {
+    const stored = localStorage.getItem(READ_EVENTS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  }
+  function markEventAsRead(eventId) {
+    const readIds = getReadEventIds();
+    if (!readIds.includes(eventId)) {
+      readIds.push(eventId);
+      localStorage.setItem(READ_EVENTS_KEY, JSON.stringify(readIds));
+    }
+  }
+
+  let events = [];
+  let currentCalendarDate = new Date(); 
+
+  async function loadEventsFromFirebase() {
+    try {
+      const snapshot = await REGION.readCollection(window.db, activeCountryCode, "events");
+      events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => {
+          if (!snapshot.legacy || !isDefaultMalaysia(activeCountryCode)) return true;
+          const itemCode = String(item.countryCode || "").toUpperCase();
+          return !itemCode || itemCode === "MY" || itemCode === "MY_PP";
+        });
+      buildCalendar();
+    } catch (err) {
+      console.error("Failed to load events:", err);
+    }
+  }
+
+  // 日历生成：整个日期格子均支持点击查看事件
+  function buildCalendar() {
+    if (!calendarBody) return;
+    calendarBody.innerHTML = "";
+
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+    const readIds = getReadEventIds();
+
+    const monthTitleEl = document.querySelector(".calendar-month");
+    if (monthTitleEl) {
+      try {
+        monthTitleEl.textContent = new Intl.DateTimeFormat(currentLang, { month: "long", year: "numeric" })
+          .format(currentCalendarDate).toLocaleUpperCase(currentLang);
+      } catch (error) {
+        monthTitleEl.textContent = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" })
+          .format(currentCalendarDate).toUpperCase();
+      }
+    }
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    let row = document.createElement("tr");
+    
+    for (let i = 0; i < firstDay; i++) {
+      row.appendChild(document.createElement("td"));
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const col = (firstDay + day - 1) % 7;
+      const td = document.createElement("td");
+
+      const num = document.createElement("span");
+      num.textContent = day;
+      if (col === 0) num.className = "calendar-day-sun";
+      if (col === 6) num.className = "calendar-day-sat";
+      td.appendChild(num);
+
+      const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+      const dayEvents = events.filter(ev => ev.date === dateStr);
+
+      if (dayEvents.length > 0) {
+        td.classList.add("has-event");
+        td.style.cursor = "pointer";
+        td.setAttribute("role", "button");
+        td.setAttribute("tabindex", "0");
+        td.setAttribute("aria-label", t("ui.viewEventDay").replace("{day}", day));
+
+        const showDayEvent = () => {
+          const ev = dayEvents[0];
+          markEventAsRead(ev.id);
+          td.querySelector(".unread-dot")?.remove();
+
+          const eventTitle = ev[`title_${currentLang}`] || ev.title_en || ev.title;
+          const eventDesc = ev[`description_${currentLang}`] || ev.description_en || ev.description;
+
+          if (calendarInfoHint) calendarInfoHint.style.display = "none";
+          if (calendarInfoTitle) {
+            calendarInfoTitle.textContent = eventTitle;
+            calendarInfoTitle.style.display = "block";
+          }
+          if (calendarInfoDesc) {
+            calendarInfoDesc.textContent = eventDesc;
+            calendarInfoDesc.style.display = "block";
+          }
+        };
+
+        td.addEventListener("click", showDayEvent);
+        td.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            showDayEvent();
+          }
+        });
+
+        // 有活动的日期仅用浅色底标识（不再使用星星）
+        const hasUnread = dayEvents.some(ev => !readIds.includes(ev.id));
+        if (hasUnread) {
+          const dot = document.createElement("span");
+          dot.className = "unread-dot";
+          td.appendChild(dot);
+        }
+      }
+
+      row.appendChild(td);
+      if (col === 6) {
+        calendarBody.appendChild(row);
+        row = document.createElement("tr");
+      }
+    }
+
+    if (row.children.length > 0) {
+      while (row.children.length < 7) {
+        row.appendChild(document.createElement("td"));
+      }
+      calendarBody.appendChild(row);
+    }
+  }
+
+  function switchMonth(delta) {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+    buildCalendar();
+    resetCalendarDetail();
+  }
+
+  function resetCalendarDetail() {
+    if (!calendarInfoHint) return;
+    calendarInfoHint.style.display = "block";
+    if (calendarInfoTitle) calendarInfoTitle.style.display = "none";
+    if (calendarInfoDesc) calendarInfoDesc.style.display = "none";
+  }
+
+  const prevMonthBtn = document.getElementById("prevMonthBtn");
+  const nextMonthBtn = document.getElementById("nextMonthBtn");
+  if (prevMonthBtn) prevMonthBtn.addEventListener("click", () => switchMonth(-1));
+  if (nextMonthBtn) nextMonthBtn.addEventListener("click", () => switchMonth(1));
+
+  const setCalendarOpen = (isOpen) => {
+    document.body.classList.toggle("show-calendar", isOpen);
+    if (calendarOverlay) calendarOverlay.setAttribute("aria-hidden", String(!isOpen));
+    if (!isOpen) {
+      resetCalendarDetail();
+    }
+    if (isOpen && calendarOverlay) {
+      scrollPageToElement(calendarOverlay, { behavior: "smooth", block: "start" });
+      loadEventsFromFirebase();
+    }
+  };
+
+  if (openCalendarBtn && calendarOverlay && calendarCloseBtn) {
+    openCalendarBtn.addEventListener("click", () => {
+      setMapOpen(false);
+      setCalendarOpen(true);
+    });
+    calendarCloseBtn.addEventListener("click", () => setCalendarOpen(false));
+  }
+
+  document
+    .querySelectorAll(".slider .buyButton, .slider .buyButton2, .slider .buyButton3, .slider .buyButton5, .slider .buyButton6")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => setCalendarOpen(false));
+    });
+
+  // 设施地图：桌面端 = 地图右侧的详情面板；手机端 = 底部抽屉（不遮住被选中的 pin，不再需要往下滚才能看到说明）。
+  // 面板里有“上一个 / 下一个”，可以连续浏览所有设施而不用回到地图上逐个点。
+  const mapCompactQuery = window.matchMedia("(max-width: 900px)");
+  const mapInfoCount = document.getElementById("mapInfoCount");
+  const mapInfoClose = document.getElementById("mapInfoClose");
+  const mapPrevBtn = document.getElementById("mapPrevBtn");
+  const mapNextBtn = document.getElementById("mapNextBtn");
+  const visibleMapPins = () => Array.from(mapPins).filter((p) => !p.hidden && p.style.display !== "none");
+
+  // 手机：抽屉从底部升起后，如果它盖住了被选中的 pin，就把页面滚到 pin 刚好露在抽屉上方。
+  function revealPinAboveSheet(pin) {
+    if (!mapCompactQuery.matches || !mapInfoBox) return;
+    requestAnimationFrame(() => {
+      const sheetTop = window.innerHeight - mapInfoBox.offsetHeight;      // 抽屉固定在底部，动画结束后的顶边
+      const navBottom = document.getElementById("nav")?.getBoundingClientRect().bottom || 0;
+      const pinRect = pin.getBoundingClientRect();
+      let delta = 0;
+      if (pinRect.bottom > sheetTop - 16) delta = pinRect.bottom - (sheetTop - 16);
+      else if (pinRect.top < navBottom + 12) delta = pinRect.top - (navBottom + 12);
+      if (!delta) return;
+      const target = Math.max(0, window.scrollY + delta);
+      if (window.MYCELIUM_LENIS) window.MYCELIUM_LENIS.scrollTo(target, { duration: 0.5 });
+      else window.scrollTo({ top: target, behavior: "smooth" });
+    });
+  }
+
+  function selectMapPin(pin) {
+    if (!pin) return;
+    mapPins.forEach((p) => {
+      p.classList.remove("active");
+      p.setAttribute("aria-pressed", "false");
+    });
+    pin.classList.add("active");
+    pin.setAttribute("aria-pressed", "true");
+    if (mapInfoTitle) mapInfoTitle.textContent = pin.dataset.name || "";
+    if (mapInfoDesc) mapInfoDesc.textContent = pin.dataset.desc || "";
+    showFacilityPhoto(facilityPhotoBase(pin), pin.dataset.name);
+    const list = visibleMapPins();
+    if (mapInfoCount) mapInfoCount.textContent = `${list.indexOf(pin) + 1} / ${list.length}`;
+    if (mapInfoBox) {
+      mapInfoBox.classList.remove("is-visible");
+      void mapInfoBox.offsetWidth;                                      // 重新触发进入动画
+      mapInfoBox.classList.add("is-visible");
+    }
+    document.body.classList.toggle("map-sheet-open", mapCompactQuery.matches);
+    revealPinAboveSheet(pin);
+  }
+
+  function closeMapDetails() {
+    mapPins.forEach((p) => {
+      p.classList.remove("active");
+      p.setAttribute("aria-pressed", "false");
+    });
+    if (mapInfoBox) mapInfoBox.classList.remove("is-visible");
+    document.body.classList.remove("map-sheet-open");
+  }
+
+  function stepMapPin(direction) {
+    const list = visibleMapPins();
+    if (!list.length) return;
+    const current = list.findIndex((p) => p.classList.contains("active"));
+    selectMapPin(list[(current + direction + list.length) % list.length]);
+  }
+
+  mapPins.forEach((pin) => pin.addEventListener("click", () => selectMapPin(pin)));
+  mapInfoClose?.addEventListener("click", closeMapDetails);
+  mapPrevBtn?.addEventListener("click", () => stepMapPin(-1));
+  mapNextBtn?.addEventListener("click", () => stepMapPin(1));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && document.body.classList.contains("show-map") && mapInfoBox?.classList.contains("is-visible")) closeMapDetails();
+  });
+  const onMapBreakpoint = () => { if (!mapCompactQuery.matches) document.body.classList.remove("map-sheet-open"); else if (mapInfoBox?.classList.contains("is-visible")) document.body.classList.add("map-sheet-open"); };
+  mapCompactQuery.addEventListener ? mapCompactQuery.addEventListener("change", onMapBreakpoint) : mapCompactQuery.addListener(onMapBreakpoint);
+  // 手机：向下轻扫抽屉即可关闭（只在内容已滚到顶时生效，不抢内容自身的滚动）
+  if (mapInfoBox) {
+    let sheetTouchY = null;
+    mapInfoBox.addEventListener("touchstart", (event) => { sheetTouchY = mapInfoBox.scrollTop <= 0 ? event.touches[0].clientY : null; }, { passive: true });
+    mapInfoBox.addEventListener("touchend", (event) => {
+      if (sheetTouchY === null || !mapCompactQuery.matches) return;
+      const dy = event.changedTouches[0].clientY - sheetTouchY;
+      sheetTouchY = null;
+      if (dy > 70) closeMapDetails();
+    }, { passive: true });
+  }
+
+  const SERVICE_DATA = {
+    en: [
+      { name: "Ahmad Razali", role: "Plumber", phone: "+60 12-345 6789", email: "ahmad.plumb@email.com", desc: "Expert in pipe installation, leak repair, bathroom fitting and water heater maintenance for residential properties." },
+      { name: "Siti Aminah", role: "Electrician", phone: "+60 13-456 7890", email: "siti.elec@email.com", desc: "Certified electrical wiring, circuit breaker repair, lighting installation and safety inspection services." },
+      { name: "Raj Kumar", role: "Air-Cond Technician", phone: "+60 14-567 8901", email: "raj.ac@email.com", desc: "Air-conditioner servicing, gas top-up, compressor repair and annual maintenance contracts." },
+      { name: "Lee Wei Ming", role: "Carpenter", phone: "+60 15-678 9012", email: "lee.carpentry@email.com", desc: "Custom furniture, kitchen cabinet, wardrobe and home renovation woodwork craftsmanship." },
+      { name: "Nurul Izzati", role: "Cleaner", phone: "+60 16-789 0123", email: "nurul.clean@email.com", desc: "Deep cleaning, move-in/out cleaning, office cleaning and regular housekeeping services." },
+      { name: "Tan Boon Heng", role: "Painter", phone: "+60 17-890 1234", email: "tan.paint@email.com", desc: "Interior/exterior painting, waterproof coating, wall texture repair and color consultation." },
+      { name: "Dr. Priya", role: "Home Doctor", phone: "+60 18-901 2345", email: "dr.priya@email.com", desc: "General practitioner home visits, health screening, vaccination and elderly care services." },
+      { name: "Zainab Yusof", role: "Landscaper", phone: "+60 19-012 3456", email: "zainab.green@email.com", desc: "Garden design, lawn maintenance, tree trimming, irrigation system and landscaping consultation." }
+    ],
+    'zh-CN': [
+      { name: "Ahmad Razali", role: "水管工", phone: "+60 12-345 6789", email: "ahmad.plumb@email.com", desc: "专业管道安装、漏水维修、卫浴安装及住宅热水器维护服务。" },
+      { name: "Siti Aminah", role: "电工", phone: "+60 13-456 7890", email: "siti.elec@email.com", desc: "持证电路布线、断路器维修、灯具安装及安全检测服务。" },
+      { name: "Raj Kumar", role: "空调维修师", phone: "+60 14-567 8901", email: "raj.ac@email.com", desc: "空调保养、加氟、压缩机维修及年度维保套餐。" },
+      { name: "Lee Wei Ming", role: "木工", phone: "+60 15-678 9012", email: "lee.carpentry@email.com", desc: "定制家具、橱柜、衣柜及全屋装修木工工艺。" },
+      { name: "Nurul Izzati", role: "保洁", phone: "+60 16-789 0123", email: "nurul.clean@email.com", desc: "深度清洁、入住/退租清洁、办公室清洁及定期家政服务。" },
+      { name: "Tan Boon Heng", role: "油漆工", phone: "+60 17-890 1234", email: "tan.paint@email.com", desc: "室内外粉刷、防水涂层、墙面修复及配色咨询。" },
+      { name: "Dr. Priya", role: "家庭医生", phone: "+60 18-901 2345", email: "dr.priya@email.com", desc: "全科医生上门问诊、健康筛查、疫苗接种及长者护理服务。" },
+      { name: "Zainab Yusof", role: "园艺师", phone: "+60 19-012 3456", email: "zainab.green@email.com", desc: "花园设计、草坪养护、树木修剪、灌溉系统及园艺咨询。" }
+    ]
+  };  
+
+  let serviceCarouselIndex = 0;
+  let serviceWheelRemainder = 0;
+  let serviceWheelArmed = false;
+
+  function renderServiceCards() {
+    const track = document.getElementById("serviceTrack");
+    if (!track) return;
+
+    const data = (isDefaultMalaysia(activeCountryCode) || (isMalaysiaSite && !(regionServices || []).length))
+      ? (SERVICE_DATA[currentLang] || SERVICE_DATA.en)
+      : (regionServices || []).map((service) => ({
+        role: service[`category_${currentLang}`] || service.category_en || t("ui.communityService"),
+        name: service[`name_${currentLang}`] || service.name_en || t("ui.serviceFallback"),
+        desc: service[`note_${currentLang}`] || service.note_en || "",
+        phone: service.contact || "",
+        email: service.email || "",
+      }));
+
+    track.innerHTML = data.map((srv, i) => `
+      <div class="service-card" data-index="${i}">
+        <span class="card-badge">${srv.role}</span>
+        <h4 class="card-name">${srv.name}</h4>
+        <p class="card-desc">${srv.desc}</p>
+        <hr class="card-divider" />
+        <div class="card-contact-row">
+          <span class="card-contact-label">${t("service.phone")}</span>
+          <a href="tel:${srv.phone.replace(/\s+/g, '')}" class="card-phone">${srv.phone}</a>
+          ${srv.email ? `<span class="card-contact-label" style="margin-top:6px;">${t("service.email")}</span><a href="mailto:${srv.email}" class="card-email">${srv.email}</a>` : ""}
+        </div>
+      </div>
+    `).join('');
+
+    serviceCarouselIndex = 0;
+    updateCarouselPosition();
+    updateNavButtons();
+  }
+
+  function updateCarouselPosition() {
+    const track = document.getElementById("serviceTrack");
+    if (!track) return;
+    const cards = track.querySelectorAll(".service-card");
+    if (cards.length === 0) return;
+    const card = cards[0];
+    const offset = serviceCarouselIndex * (card.offsetWidth + 24);
+    track.style.transform = `translateX(-${offset}px)`;
+  }
+
+  function updateNavButtons() {
+    const prevBtn = document.getElementById("servicePrevBtn");
+    const nextBtn = document.getElementById("serviceNextBtn");
+    if (!prevBtn || !nextBtn) return;
+    const track = document.getElementById("serviceTrack");
+    if (!track) return;
+    const cards = track.querySelectorAll(".service-card");
+    const totalCards = cards.length;
+    if (totalCards === 0) {
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+    const wrapperWidth = track.parentElement.offsetWidth;
+    const card = cards[0];
+    const visibleCards = Math.floor((wrapperWidth - card.offsetWidth) / (card.offsetWidth + 24)) + 1;
+    const maxIndex = Math.max(0, totalCards - visibleCards);
+    prevBtn.disabled = serviceCarouselIndex <= 0;
+    nextBtn.disabled = serviceCarouselIndex >= maxIndex;
+  }
+
+  function slideServiceCards(direction) {
+    const track = document.getElementById("serviceTrack");
+    if (!track) return;
+    const cards = track.querySelectorAll(".service-card");
+    if (cards.length === 0) return;
+    const wrapperWidth = track.parentElement.offsetWidth;
+    const card = cards[0];
+    const visibleCards = Math.floor((wrapperWidth - card.offsetWidth) / (card.offsetWidth + 24)) + 1;
+    const maxIndex = Math.max(0, cards.length - visibleCards);
+
+    serviceCarouselIndex += direction;
+    if (serviceCarouselIndex < 0) serviceCarouselIndex = 0;
+    if (serviceCarouselIndex > maxIndex) serviceCarouselIndex = maxIndex;
+
+    updateCarouselPosition();
+    updateNavButtons();
+  }
+  
+  const openServiceDirectoryBtn = document.getElementById("openServiceDirectoryBtn");
+  const serviceSection = document.getElementById("serviceSection");
+  const serviceCloseBtn = document.getElementById("serviceCloseBtn");
+  const servicePrevBtn = document.getElementById("servicePrevBtn");
+  const serviceNextBtn = document.getElementById("serviceNextBtn");
+
+  const setServiceOpen = (isOpen) => {
+    if (!serviceSection) return;
+    if (isOpen) {
+      serviceWheelArmed = true;
+      document.body.classList.add("show-service");
+      renderServiceCards();
+      serviceSection.setAttribute("aria-hidden", "false");
+      setTimeout(() => {
+        scrollPageToElement(serviceSection, { behavior: "smooth", block: "start" });
+        serviceSection.focus({ preventScroll: true });
+      }, 100);
+    } else {
+      serviceWheelArmed = false;
+      document.body.classList.remove("show-service");
+      serviceSection.setAttribute("aria-hidden", "true");
+      openServiceDirectoryBtn?.focus({ preventScroll: true });
+    }
+  };
+
+  if (openServiceDirectoryBtn && serviceSection) {
+    openServiceDirectoryBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      setServiceOpen(true);
+    });
+  }
+
+  if (serviceCloseBtn && serviceSection) {
+    serviceCloseBtn.addEventListener("click", () => setServiceOpen(false));
+  }
+  if (servicePrevBtn) servicePrevBtn.addEventListener("click", () => slideServiceCards(-1));
+  if (serviceNextBtn) serviceNextBtn.addEventListener("click", () => slideServiceCards(1));
+
+  if (serviceSection) {
+    // 仅在明确横向滚动时才驱动卡片；纵向滚动完全放行，不干扰页面上下滑
+    document.addEventListener("wheel", (event) => {
+      if (!document.body.classList.contains("show-service")) return;
+      if (!serviceWheelArmed && !serviceSection.contains(event.target)) return;
+
+      const absX = Math.abs(event.deltaX);
+      const absY = Math.abs(event.deltaY);
+
+      // 必须是明显的横向意图：|deltaX| 显著大于 |deltaY|
+      const isHorizontal = absX > absY * 1.5 && absX > 4;
+      if (!isHorizontal) {
+        // 纯纵向或接近纵向 → 不拦截，让页面正常滚动
+        serviceWheelRemainder = 0;
+        return;
+      }
+
+      const delta = event.deltaX;
+      const canMove = delta > 0
+        ? serviceNextBtn && !serviceNextBtn.disabled
+        : servicePrevBtn && !servicePrevBtn.disabled;
+
+      if (!canMove) {
+        serviceWheelRemainder = 0;
+        return;
+      }
+
+      event.preventDefault();
+      serviceWheelRemainder += delta;
+      if (Math.abs(serviceWheelRemainder) < 42) return;
+      slideServiceCards(serviceWheelRemainder > 0 ? 1 : -1);
+      serviceWheelRemainder = 0;
+    }, { passive: false, capture: true });
+
+    // 触控左右滑动：只在水平位移明显大于垂直时触发
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchActive = false;
+
+    serviceSection.addEventListener("touchstart", (event) => {
+      if (!document.body.classList.contains("show-service")) return;
+      const t = event.changedTouches[0];
+      if (!t) return;
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      touchActive = true;
+      serviceWheelRemainder = 0;
+    }, { passive: true });
+
+    serviceSection.addEventListener("touchend", (event) => {
+      if (!touchActive || !document.body.classList.contains("show-service")) return;
+      touchActive = false;
+      const t = event.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      // 水平滑动阈值，且水平明显大于垂直
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+      slideServiceCards(dx < 0 ? 1 : -1);
+    }, { passive: true });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (!document.body.classList.contains("show-service")) return;
+      if (!serviceSection.contains(event.target) && !openServiceDirectoryBtn?.contains(event.target)) {
+        serviceWheelArmed = false;
+      }
+    });
+
+    serviceSection.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      event.stopPropagation();
+      slideServiceCards(event.key === "ArrowRight" ? 1 : -1);
+    });
+  }
+
+  window.addEventListener("resize", () => {
+    updateCarouselPosition();
+    updateNavButtons();
+  });
+
+  document
+    .querySelectorAll(".slider .buyButton, .slider .buyButton2, .slider .buyButton4, .slider .buyButton5, .slider .buyButton6")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => setServiceOpen(false));
+    });
+
+  function renderFAQItems() {
+    const body = document.getElementById("faqBody");
+    if (!body) return;
+    const data = Array.isArray(regionFaqs) && regionFaqs.length
+      ? regionFaqs.map((faq) => ({
+        q: faq[`q_${currentLang}`] || faq.q_en || "",
+        a: faq[`a_${currentLang}`] || faq.a_en || "",
+      }))
+      : (isMalaysiaSite ? (i18n[currentLang]?.faq?.items || i18n.en.faq.items) : []);
+
+    body.innerHTML = data.map((faq, i) => `
+      <div class="faq-item" data-index="${i}">
+        <div class="faq-question">
+          <h3>${faq.q}</h3>
+          <div class="faq-toggle">+</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>${faq.a}</p>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    const items = body.querySelectorAll(".faq-item");
+    items.forEach(item => {
+      const question = item.querySelector(".faq-question");
+      const answer = item.querySelector(".faq-answer");
+      question.addEventListener("click", () => {
+        const isActive = item.classList.contains("active");
+        items.forEach(other => {
+          other.classList.remove("active");
+          other.querySelector(".faq-answer").style.maxHeight = "0";
+        });
+        if (!isActive) {
+          item.classList.add("active");
+          answer.style.maxHeight = answer.scrollHeight + "px";
+        }
+      });
+    });
+  }  
+  
+  const openFAQBtn = document.getElementById("openFAQBtn");
+  const faqSection = document.getElementById("faqSection");
+  const faqCloseBtn = document.getElementById("faqCloseBtn");
+
+  const setFAQOpen = (isOpen) => {
+    if (!faqSection) return;
+    if (isOpen) {
+      document.body.classList.add("show-faq");
+      renderFAQItems();
+      faqSection.setAttribute("aria-hidden", "false");
+      setTimeout(() => {
+        scrollPageToElement(faqSection, { behavior: "smooth", block: "start" });
+      }, 100);
+    } else {
+      document.body.classList.remove("show-faq");
+      faqSection.setAttribute("aria-hidden", "true");
+      const items = faqSection.querySelectorAll(".faq-item");
+      items.forEach(item => {
+        item.classList.remove("active");
+        item.querySelector(".faq-answer").style.maxHeight = "0";
+      });
+    }
+  };
+
+  if (openFAQBtn && faqSection) {
+    openFAQBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      setFAQOpen(true);
+    });
+  }
+
+  if (faqCloseBtn && faqSection) {
+    faqCloseBtn.addEventListener("click", () => setFAQOpen(false));
+  }
+
+  document
+    .querySelectorAll(".slider .buyButton, .slider .buyButton2, .slider .buyButton3, .slider .buyButton4, .slider .buyButton5")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => setFAQOpen(false));
+    });
+
+  const backToTopBtn = document.getElementById("backToTopBtn");
+  if (backToTopBtn) {
+    const communityNav = document.getElementById("nav");
+    const heroTrack = document.getElementById("heroSequence");
+    const getNavPageTop = () => {
+      if (!communityNav) return 0;
+      if (heroTrack) {
+        const overlap = Number.parseFloat(window.getComputedStyle(communityNav).marginTop) || 0;
+        return Math.max(0, heroTrack.getBoundingClientRect().bottom + window.scrollY + overlap);
+      }
+      return Math.max(0, communityNav.getBoundingClientRect().top + window.scrollY);
+    };
+
+    const toggleBackToTopBtn = () => {
+      const sliderEl = document.querySelector('.slider');
+      const offset = sliderEl ? sliderEl.offsetHeight : (communityNav ? communityNav.offsetHeight : 600);
+      const showAfter = getNavPageTop() + offset - (window.innerHeight * 0.3);
+      backToTopBtn.classList.toggle("show", window.scrollY > showAfter);
+    };
+    toggleBackToTopBtn();
+    window.addEventListener("scroll", toggleBackToTopBtn);
+    window.addEventListener("resize", toggleBackToTopBtn, { passive: true });
+    document.addEventListener("fullscreenchange", toggleBackToTopBtn);
+
+    backToTopBtn.addEventListener("click", () => {
+      const target = getNavPageTop();
+      if (window.MYCELIUM_LENIS) {
+        window.MYCELIUM_LENIS.scrollTo(target, { duration: 0.9 });
+        return;
+      }
+      window.scrollTo({ top: target, behavior: "smooth" });
+    });
+  }
+
+  const volunteerOverlay = document.getElementById("volunteer");
+  const openVolunteerBtn = document.getElementById("openVolunteerBtn");
+
+const setVolunteerOpen = (isOpen) => {
+    document.body.classList.toggle("show-volunteer", isOpen);
+    if (volunteerOverlay) volunteerOverlay.setAttribute("aria-hidden", String(!isOpen));
+
+    if (isOpen) {
+      if (window.MYCELIUM_VOLUNTEER_STRIP && typeof window.MYCELIUM_VOLUNTEER_STRIP.open === "function") {
+        window.MYCELIUM_VOLUNTEER_STRIP.open();
+      }
+      // 展开后平滑顺畅滑入当前板块
+      requestAnimationFrame(() => {
+        if (volunteerOverlay) {
+          scrollPageToElement(volunteerOverlay, { behavior: "smooth", block: "start" });
+        }
+      });
+    } else {
+      if (window.MYCELIUM_VOLUNTEER_STRIP && typeof window.MYCELIUM_VOLUNTEER_STRIP.close === "function") {
+        window.MYCELIUM_VOLUNTEER_STRIP.close();
+      }
+    }
+  };
+    if (openVolunteerBtn && volunteerOverlay) {
+    openVolunteerBtn.addEventListener("click", () => {
+      setMapOpen(false);
+      setAnnouncementOpen(false);
+      setCalendarOpen(false);
+      setServiceOpen(false);
+      setFAQOpen(false);
+      setVolunteerOpen(true);
+    });
+  }
+
+  const volunteerCloseBtn = document.getElementById("volunteerCloseBtn");
+  if (volunteerCloseBtn) {
+    volunteerCloseBtn.addEventListener("click", () => setVolunteerOpen(false));
+  }
+
+  document
+    .querySelectorAll(".slider .buyButton, .slider .buyButton2, .slider .buyButton3, .slider .buyButton4, .slider .buyButton6")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => setVolunteerOpen(false));
+    });
+
+  const volunteerRegisterBtns = document.querySelectorAll(".volunteerRegisterBtn");
+  const volunteerFormOverlay = document.getElementById("volunteerFormOverlay");
+  const volunteerFormClose = document.getElementById("volunteerFormClose");
+  const volunteerFormActivity = document.getElementById("volunteerFormActivity");
+  const volunteerFormEl = document.getElementById("volunteerFormEl");
+
+  const openVolunteerForm = (activityName) => {
+    if (!volunteerFormOverlay) return;
+    volunteerFormActivity.textContent = t("volunteer.activityLabel") + " " + activityName;
+    volunteerFormEl.dataset.activity = activityName;
+    volunteerFormOverlay.classList.add("active");
+  };
+
+  const closeVolunteerForm = () => {
+    if (!volunteerFormOverlay) return;
+    volunteerFormOverlay.classList.remove("active");
+    // Typed answers are kept on close (draft); the form is only reset after a successful submit below.
+  };
+
+  // Delegated so cards added later from the admin-managed list also open the form.
+  document.addEventListener("click", (event) => {
+    const btn = event.target.closest?.(".volunteerRegisterBtn");
+    if (btn) openVolunteerForm(btn.dataset.activity);
+  });
+
+  if (volunteerFormClose) {
+    volunteerFormClose.addEventListener("click", closeVolunteerForm);
+  }
+
+  if (volunteerFormOverlay) {
+    volunteerFormOverlay.addEventListener("click", (e) => {
+      if (e.target === volunteerFormOverlay) closeVolunteerForm();
+    });
+  }
+
+  // 志愿者表单提交：采用品牌弹窗提醒并直接存入 Firestore
+  if (volunteerFormEl) {
+    volunteerFormEl.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const fullName = document.getElementById("volFullName").value.trim();
+      const phone = document.getElementById("volPhone").value.trim();
+      const address = document.getElementById("volAddress").value.trim();
+      const notes = document.getElementById("volNotes").value.trim();
+      const activity = volunteerFormEl.dataset.activity;
+
+      if (!fullName || !phone || !activity) {
+        showMyceliumNotice(t("volunteer.requiredTip"), "Notice");
+        return;
+      }
+
+      const submitBtn = volunteerFormEl.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = t("volunteer.submitting");
+      }
+
+      try {
+        const volunteerRecord = {
+          countryCode: activeCountryCode,
+          fullName: fullName,
+          phone: phone,
+          address: address,
+          notes: notes,
+          activity: activity,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await locationCollection("volunteers").add(volunteerRecord);
+
+        showMyceliumNotice(fullName + ", " + t("volunteer.successTip"), t("ui.registrationSubmitted"));
+        volunteerFormEl.reset();
+        closeVolunteerForm();
+      } catch (err) {
+        console.error("Registration submission failed:", err);
+        showMyceliumNotice(t("volunteer.errorTip"), t("ui.submissionError"));
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = t("volunteer.submitBtn");
+        }
+      }
+    });
+  }
+  
+  function updateActiveMenuItem(index) {
+    const activeChanged = !menuItems[index]?.classList.contains("active");
+    menuItems.forEach((item, i) => {
+      const active = i === index;
+      if (i === index) item.classList.add("active");
+      else item.classList.remove("active");
+      if (active) item.setAttribute("aria-current", "page");
+      else item.removeAttribute("aria-current");
+    });
+    document.querySelectorAll(".hero-dot").forEach((dot, i) => {
+      dot.classList.toggle("active", i === index);
+    });
+    document.querySelectorAll("[data-hero-index]").forEach((el) => {
+      el.textContent = String(index + 1).padStart(2, "0");
+    });
+    if (activeChanged) window.dispatchEvent(new CustomEvent("mycelium:slidechange", { detail: { index } }));
+  }
+
+  function closeAllSections() {
+    setAnnouncementOpen(false);
+    setMapOpen(false);
+    setServiceOpen(false);
+    setCalendarOpen(false);
+    setVolunteerOpen(false);
+    setFAQOpen(false);
+    closeAnnouncementDetail();
+  }
+
+  function syncMenuOnScroll() {
+    const sliderEl = document.querySelector(".slider");
+    if (!sliderEl) return;
+    const rect = sliderEl.getBoundingClientRect();
+    if (rect.top > 0) return;
+    if (currentIndex >= 0 && currentIndex < menuItems.length) {
+      updateActiveMenuItem(currentIndex);
+    }
+  }
+
+  let scrollTick = false;
+  window.addEventListener("scroll", () => {
+    if (!scrollTick) {
+      window.requestAnimationFrame(() => {
+        syncMenuOnScroll();
+        scrollTick = false;
+      });
+      scrollTick = true;
+    }
+  });
+
+  updateActiveMenuItem(0);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") {
+      currentIndex = currentIndex > 0 ? currentIndex - 1 : total - 1;
+      slideSwitch(currentIndex);
+      updateActiveMenuItem(currentIndex);
+    }
+    if (e.key === "ArrowRight") {
+      currentIndex = currentIndex < total - 1 ? currentIndex + 1 : 0;
+      slideSwitch(currentIndex);
+      updateActiveMenuItem(currentIndex);
+    }
+  });
+
+  function slideSwitch(targetIdx) {
+    closeAllSections();
+    wrapper.style.transform = `translateX(${-100 * targetIdx}vw)`;
+    const bottomWrapper = document.querySelector(".bottomSliderWrapper");
+    if (bottomWrapper) {
+      bottomWrapper.style.transform = `translateX(${-100 * targetIdx}vw)`;
+    }
+    updateActiveMenuItem(targetIdx);
+    scrollToSlider();
+    resetCalendarDetail();
+  }
+
+  const searchInput = document.getElementById("navSearchInput");
+
+  let searchTip = document.querySelector(".search-tip");
+  if (!searchTip) {
+    searchTip = document.createElement("div");
+    searchTip.className = "search-tip";
+    document.body.prepend(searchTip);
+  }
+
+  function showTip(text) {
+    searchTip.textContent = text;
+    searchTip.classList.add("show");
+    setTimeout(() => searchTip.classList.remove("show"), 3000);
+  }
+
+  function performSearch(query) {
+    const q = query.toLowerCase().trim();
+    if (!q) return;
+
+    // Each action uses the visitor's own language keywords; English is only a fallback for a language that has none.
+    // (Locale packs do not always carry slideIndex, so it is derived from the action here.)
+    const SEARCH_SLIDE_BY_ACTION = { announcement: 0, map: 1, service: 2, calendar: 3, volunteer: 4, faq: 5 };
+    const keywordMap = Object.keys(SEARCH_SLIDE_BY_ACTION).map((action) => {
+      const own = (i18n[currentLang]?.searchKeywords || []).find((entry) => entry.action === action);
+      const english = (i18n[DEFAULT_LANG]?.searchKeywords || []).find((entry) => entry.action === action);
+      return { action, slideIndex: SEARCH_SLIDE_BY_ACTION[action], keywords: own?.keywords?.length ? own.keywords : (english?.keywords || []) };
+    });
+    let matched = null;
+    let matchedPinId = null;
+
+    let maxMatch = 0;
+    keywordMap.forEach(entry => {
+      let matchCount = 0;
+      entry.keywords.forEach(kw => {
+        if (q.includes(kw.toLowerCase())) matchCount++;
+      });
+      if (matchCount > maxMatch) {
+        maxMatch = matchCount;
+        matched = entry;
+      }
+    });
+
+    if (matched && matched.action === "map") {
+      const mapPinsData = i18n[currentLang]?.mapPins || {};
+      for (const pinId in mapPinsData) {
+        const pin = mapPinsData[pinId];
+        if (q.includes(pin.name.toLowerCase())) {
+          matchedPinId = pinId;
+          break;
+        }
+      }
+    }
+
+    if (matched) {
+      currentIndex = matched.slideIndex;
+      wrapper.style.transform = `translateX(${-100 * currentIndex}vw)`;
+      const bottomWrapper = document.querySelector(".bottomSliderWrapper");
+      if (bottomWrapper) bottomWrapper.style.transform = `translateX(${-100 * currentIndex}vw)`;
+      updateActiveMenuItem(currentIndex);
+      closeAllSections();
+
+      switch (matched.action) {
+        case "announcement": setAnnouncementOpen(true); break;
+        case "map":
+          setMapOpen(true);
+          if (matchedPinId) {
+            const pinEl = document.querySelector(`.pin[data-pin-id="${matchedPinId}"]`);
+            if (pinEl) selectMapPin(pinEl);
+          }
+          break;
+        case "service": setServiceOpen(true); break;
+        case "calendar": setCalendarOpen(true); break;
+        case "volunteer": setVolunteerOpen(true); break;
+        case "faq": setFAQOpen(true); break;
+      }
+
+      setTimeout(() => {
+        const targetSection = document.querySelector(`.${matched.action}-overlay, #${matched.action}Section, #${matched.action}`);
+        if (targetSection) scrollPageToElement(targetSection, { behavior: "smooth", block: "start" });
+      }, 200);
+    } else {
+      showTip(t("common.searchNoResult"));
+    }
+
+    searchInput.value = "";
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        performSearch(searchInput.value);
+      }
+    });
+  }  
+
+  const featureTriggers = document.querySelectorAll(".feature-modal-trigger");
+  const modalOverlays = document.querySelectorAll(".feature-modal-overlay");
+  const modalCloseBtns = document.querySelectorAll(".feature-modal-close");
+  const connectBtn = document.getElementById("connectWithUsBtn");
+  const footerEl = document.querySelector(".footer");
+
+  let tooltipTimer = null;
+  featureTriggers.forEach(card => {
+    card.addEventListener("mouseenter", () => {
+      const tooltip = card.querySelector(".feature-tooltip");
+      clearTimeout(tooltipTimer);
+      tooltipTimer = setTimeout(() => {
+        tooltip?.classList.add("show");
+      }, 1000);
+    });
+
+    card.addEventListener("mouseleave", () => {
+      const tooltip = card.querySelector(".feature-tooltip");
+      clearTimeout(tooltipTimer);
+      tooltip?.classList.remove("show");
+    });
+  });
+
+  if (connectBtn && footerEl) {
+    connectBtn.addEventListener("click", () => {
+      if (connectBtn.classList.contains("feature-modal-trigger")) return;
+      scrollPageToElement(footerEl, { behavior: "smooth", block: "start" });
+    });
+  }
+
+  featureTriggers.forEach(card => {
+    card.addEventListener("click", () => {
+      const modalId = card.dataset.modal;
+      const targetModal = document.getElementById(modalId);
+      if (targetModal) {
+        targetModal.classList.add("active");
+        targetModal.setAttribute("aria-hidden", "false");
+      }
+    });
+  });
+
+  modalCloseBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const modal = btn.closest(".feature-modal-overlay");
+      modal?.classList.remove("active");
+      modal?.setAttribute("aria-hidden", "true");
+    });
+  });
+
+  modalOverlays.forEach(overlay => {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove("active");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+    });
+  });
+
+  const legalModal = document.getElementById('legalModal'); 
+  const legalModalTitle = document.getElementById('legalModalTitle');
+  const legalModalContent = document.getElementById('legalModalContent');
+  const legalModalClose = document.getElementById('legalModalClose');
+
+  function openLegalDoc(docKey) {
+    if (!legalModal) return;
+    const docData = i18n[currentLang].legalDocs[docKey];
+    if (docData) {
+      legalModalTitle.textContent = docData.title;
+      if (!isDefaultMalaysia(window.MYCELIUM_COUNTRY) && docKey === "rules") {
+        const rules = window.MYCELIUM_REGION_RULES;
+        const items = rules?.[`items_${currentLang}`] || rules?.items_en;
+        if (Array.isArray(items) && items.length) {
+          const escapeHtml = (val) => String(val).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+          legalModalContent.innerHTML = `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+        } else {
+          legalModalContent.innerHTML = docData.content;
+        }
+      } else {
+        legalModalContent.innerHTML = docData.content;
+      }
+      document.body.classList.add('show-legal');
+      legalModal.classList.add('active');
+      legalModal.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function closeLegalDoc() {
+    if (!legalModal) return;
+    document.body.classList.remove('show-legal');
+    legalModal.classList.remove('active');
+    legalModal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (legalModalClose) legalModalClose.addEventListener('click', closeLegalDoc);
+  if (legalModal) {
+    legalModal.addEventListener('click', (e) => {
+      if (e.target === legalModal) closeLegalDoc();
+    });
+  }
+
+  document.querySelectorAll('[data-doc]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openLegalDoc(link.dataset.doc);
+    });
+  });
+
+  document.querySelectorAll(".footer-links [data-slide]").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetIndex = Number(link.dataset.slide);
+      if (menuItems[targetIndex]) menuItems[targetIndex].click();
+    });
+  });
+
+  // Newsletter 表单提交：采用品牌弹窗提醒并直接存入 Firestore
+  const newsletterForm = document.getElementById('newsletterForm');
+  const newsletterEmail = document.getElementById('newsletterEmail');
+
+  if (newsletterForm) {
+    newsletterForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const email = newsletterEmail.value.trim();
+      const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailReg.test(email)) {
+        showMyceliumNotice(t('newsletter.invalidEmail'), "Notice");
+        return;
+      }
+
+      const submitBtn = newsletterForm.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = t('newsletter.submitting');
+
+      try {
+        const newsletterRecord = {
+          countryCode: activeCountryCode,
+          email: email,
+          subscribedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          language: currentLang, 
+          source: 'website_footer'
+        };
+
+        await locationCollection('newsletter_subscribers').add(newsletterRecord);
+
+        showMyceliumNotice(t('newsletter.success'), t('ui.subscribed'));
+        newsletterForm.reset();
+      } catch (err) {
+        console.error('Subscription failed:', err);
+        showMyceliumNotice(t('newsletter.failure'), t('ui.subscriptionError'));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    });
+  }
+
+  // FAQ records are read from Firestore for every region; Malaysian built-in FAQs remain the empty-database fallback.
+  loadRegionalFAQContent();
+  // Other regional directory content is loaded only for non-default sites to preserve the default Malaysia map/data flow.
+  if (!isDefaultMalaysia(activeCountryCode)) loadRegionalDirectoryContent();
+  else updateMapPinsLanguage();
+  loadVolunteerActivities();
+}

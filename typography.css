@@ -1,0 +1,91 @@
+/* ==========================================================================
+   MYCELIUM - typography system  (loaded LAST on the public site and on /portal/)
+
+   One idea: a calm institutional serif for headlines, a neutral grotesque for everything you read or tap,
+   and the matching Noto face for scripts that Latin fonts do not cover - so every language keeps the same voice.
+
+   Roles
+     --serif  headlines, big numbers, quotes   Source Serif 4 (optical-size axis 8-60, so display sizes get finer shapes)
+     --sans   body, labels, buttons, forms      Inter (optical-size axis 14-32, the same idea as Apple's SF Text / SF Display)
+   Chinese  : Noto Sans SC / Noto Serif SC          Tamil: Noto Sans Tamil / Noto Serif Tamil
+   Latin letters and digits inside Chinese or Tamil text still come from Inter / Source Serif, because they are listed first.
+
+   The rules below the tokens exist because switching language used to change the look of the page:
+     - Chinese and Tamil fell back to whatever the visitor's system had (and the serif headline fell back to a Song / Mincho style face)
+     - label tracking (letter-spacing) was applied to scripts that must not be tracked
+     - tiny labels (9-10px) are unreadable in Chinese and Tamil
+   ========================================================================== */
+
+/* Same metrics as Inter while it loads, so the page does not jump when the web font arrives. */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial"), local("Helvetica");
+  ascent-override: 90.2%;
+  descent-override: 22.5%;
+  line-gap-override: 0%;
+  size-adjust: 107%;
+}
+
+:root {
+  --serif: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: "Inter", "Inter Fallback", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---- Per-language stacks (the Latin face first, then the script face) ------------------------------------------ */
+html:lang(zh-CN) {
+  --sans: "Inter", "Inter Fallback", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --serif: "Source Serif 4", "Noto Serif SC", "Songti SC", "SimSun", serif;
+}
+html:lang(ta) {
+  --sans: "Inter", "Inter Fallback", "Noto Sans Tamil", "Nirmala UI", "Tamil Sangam MN", sans-serif;
+  --serif: "Source Serif 4", "Noto Serif Tamil", "Latha", "Tamil Sangam MN", serif;
+}
+
+/* ---- Rendering --------------------------------------------------------------------------------------------------- */
+html {
+  font-size: 15px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-optical-sizing: auto;           /* Inter and Source Serif pick their optical size from the font size */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body {
+  font-kerning: normal;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+:where(h1, h2, h3, h4, .section-title, .intro-title) { text-wrap: balance; font-synthesis: none; }
+:where(p, li, figcaption) { text-wrap: pretty; }
+
+/* Figures that change or line up in columns */
+:where(.map-info-count, .hero-index, time, .stat-number, .card-stat strong, .calendar-day, .calendar-title, td, th) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Chinese (Simplified) -------------------------------------------------------------------------------------- */
+/* Han characters fill the whole em box (about 0.9em tall vs. 0.55em for Latin lowercase), so the same px size reads larger:
+   a slightly smaller root keeps the page at the same visual density as the English one. */
+html:lang(zh-CN) { font-size: 16.5px; }
+html:lang(zh-CN) body { line-height: 1.75; }
+html:lang(zh-CN) body * { letter-spacing: 0.02em !important; }       /* wide tracking scatters Chinese; a hint of it keeps labels airy */
+html:lang(zh-CN) :is(h1, h2, h3, .section-title, .intro-title) { line-height: 1.28; }
+html:lang(zh-CN) :is(em, i, cite, blockquote p, .ga-quote p) { font-style: normal; }   /* Chinese has no true italic */
+
+/* ---- Tamil ------------------------------------------------------------------------------------------------------- */
+/* Tamil must never be letter-spaced (it breaks the joined letter shapes) and its stacked marks need more line height. */
+html:lang(ta) { font-size: 15.5px; }
+html:lang(ta) body { line-height: 1.8; }
+html:lang(ta) body * { letter-spacing: 0 !important; }
+html:lang(ta) :is(h1, h2, h3, .section-title, .intro-title) { line-height: 1.32; zoom: 0.94; }   /* long words: a touch smaller at display size */
+html:lang(ta) :is(em, i, cite, blockquote p, .ga-quote p) { font-style: normal; }
+
+/* ---- Other scripts offered by the language dialog ----------------------------------------------------------------- */
+html:is(:lang(ar), :lang(fa), :lang(ur), :lang(he), :lang(hi), :lang(mr), :lang(bn), :lang(gu), :lang(kn), :lang(ml), :lang(pa), :lang(te), :lang(th)) body * {
+  letter-spacing: 0 !important;
+}
+html:is(:lang(ja), :lang(ko), :lang(zh-TW)) body * { letter-spacing: 0.02em !important; }
+html:is(:lang(ja), :lang(ko), :lang(zh-TW)) body { line-height: 1.75; }
+
+/* Safety net for the Resident Portal, which has its own shell */
+.portal-app { font-family: var(--sans); }

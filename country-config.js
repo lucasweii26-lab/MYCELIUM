@@ -1,0 +1,343 @@
+// country-config.js
+const facilityMapUrl = new URL("./img/Slide/facility_map.webp", import.meta.url).href;
+const portlandFacilityMapUrl = new URL("./img/Slide/PORTLANDfacility.webp", import.meta.url).href;
+
+export const DEFAULT_COUNTRY_CODE = "MY_PP";
+
+// ==========================================================================
+// 1. WORLDWIDE NEWS (Applies to ALL locations globally)
+// 均为公共广播国际新闻，100% 开放嵌入且无版权地域限制
+// ==========================================================================
+const GLOBAL_NEWS = [
+  {
+    id: "dw-news",
+    name: "DW News",
+    description: "24/7 live news from the heart of Europe. Global issues and tech focus.",
+    descriptionI18n: {
+      "en": "24/7 live news from the heart of Europe. Global issues and tech focus.",
+      "es": "Noticias en directo las 24 horas desde el corazón de Europa, con atención a los asuntos globales y la tecnología.",
+      "zh-CN": "来自欧洲中心的全天候新闻直播，聚焦全球议题与科技发展。",
+      "ms": "Berita langsung 24 jam dari tengah Eropah, dengan tumpuan pada isu global dan teknologi.",
+      "ta": "ஐரோப்பாவின் மையத்திலிருந்து 24 மணி நேர நேரலைச் செய்திகள்; உலகளாவிய பிரச்சினைகள் மற்றும் தொழில்நுட்பத்தில் கவனம் செலுத்துகிறது.",
+    },
+    youtubeChannelId: "UCknLrEdhRCp1aegoMqRaCZg",
+    newsUrl: "https://www.dw.com/",
+  },
+  {
+    id: "al-jazeera",
+    name: "Al Jazeera English",
+    description: "In-depth global news and award-winning journalism.",
+    descriptionI18n: {
+      "en": "In-depth global news and award-winning journalism.",
+      "es": "Noticias internacionales en profundidad y periodismo galardonado.",
+      "zh-CN": "深入报道全球新闻，呈现屡获殊荣的新闻作品。",
+      "ms": "Berita global yang mendalam dan kewartawanan yang memenangi anugerah.",
+      "ta": "ஆழமான உலகச் செய்திகள் மற்றும் விருதுகள் பெற்ற பத்திரிகைச் செய்திகள்.",
+    },
+    youtubeChannelId: "UCNye-wNBqNL5ZzHSJj3l8Bg",
+    newsUrl: "https://www.aljazeera.com/",
+  },
+  {
+    id: "france-24",
+    name: "France 24 English",
+    description: "Continuous international news broadcast from Paris.",
+    descriptionI18n: {
+      "en": "Continuous international news broadcast from Paris.",
+      "es": "Emisión continua de noticias internacionales desde París.",
+      "zh-CN": "来自巴黎的国际新闻全天候播报。",
+      "ms": "Siaran berita antarabangsa berterusan dari Paris.",
+      "ta": "பாரிஸிலிருந்து தொடர்ச்சியாக ஒளிபரப்பப்படும் சர்வதேசச் செய்திகள்.",
+    },
+    youtubeChannelId: "UCQfwfsi5VrQ8yKZ-UWmAEFg",
+    newsUrl: "https://www.france24.com/en/",
+  }
+];
+
+// ==========================================================================
+// 2. NATIONAL NEWS (Applies to all cities within the specific country)
+// ==========================================================================
+const NATIONAL_NEWS = {
+  "MY": [
+    {
+      id: "bernama-tv",
+      name: "Bernama TV",
+      description: "Malaysia's official 24-hour national news agency.",
+      descriptionI18n: {
+        "en": "Malaysia's official 24-hour national news agency.",
+        "es": "La agencia nacional oficial de noticias de Malasia, con cobertura las 24 horas.",
+        "zh-CN": "马来西亚官方国家新闻机构，提供全天候新闻报道。",
+        "ms": "Agensi berita nasional rasmi Malaysia yang beroperasi 24 jam.",
+        "ta": "மலேசியாவின் அதிகாரப்பூர்வ 24 மணி நேர தேசிய செய்தி நிறுவனம்.",
+      },
+      youtubeChannelId: "UCcZg5r9hBqK_VPUT2I7eYVw", // 马新社官方频道，无版权嵌入限制
+      newsUrl: "https://www.bernama.com/",
+    }
+  ],
+  "US": [
+    {
+      id: "livenow-fox",
+      name: "LiveNOW from FOX",
+      description: "Raw and unfiltered 24/7 breaking news across the United States.",
+      descriptionI18n: {
+        "en": "Raw and unfiltered 24/7 breaking news across the United States.",
+        "es": "Noticias de última hora de todo Estados Unidos, en directo las 24 horas y sin filtros.",
+        "zh-CN": "全天候直播美国各地突发新闻，呈现未经剪辑的现场报道。",
+        "ms": "Berita terkini dari seluruh Amerika Syarikat secara langsung 24 jam tanpa tapisan.",
+        "ta": "அமெரிக்கா முழுவதிலுமிருந்து வடிகட்டப்படாத முக்கியச் செய்திகள் 24 மணி நேரமும் நேரலையில்.",
+      },
+      youtubeChannelId: "UCJg9wBPyKMNA5sRDnvzmkdg", // 专为互联网打造的新闻流，开放嵌入
+      newsUrl: "https://www.livenowfox.com/",
+    },
+    {
+      id: "abc-news",
+      name: "ABC News Live",
+      description: "24/7 coverage of breaking news, politics, and weather.",
+      descriptionI18n: {
+        "en": "24/7 coverage of breaking news, politics, and weather.",
+        "es": "Cobertura las 24 horas de noticias de última hora, política y clima.",
+        "zh-CN": "全天候报道突发新闻、政治动态与天气资讯。",
+        "ms": "Liputan 24 jam tentang berita terkini, politik dan cuaca.",
+        "ta": "முக்கியச் செய்திகள், அரசியல் மற்றும் வானிலை குறித்த 24 மணி நேரச் செய்திகள்.",
+      },
+      youtubeChannelId: "UCBi2mrWuNuyYy4gbM6fU18Q", // 全球无限制，100% 支持嵌入
+      newsUrl: "https://abcnews.go.com/Live",
+    }
+  ]
+};
+
+// ==========================================================================
+// 3. COMMUNITY SITES CONFIGURATION
+// ==========================================================================
+export const COUNTRY_SITES = {
+  // 1. Malaysia - Penang (Pulau Tikus)
+  MY_PP: {
+    code: "MY_PP",
+    countryCode: "MY",
+    cityCode: "PP",
+    name: "Malaysia",
+    city: "Pulau Tikus",
+    displayName: "Pulau Tikus, Penang",
+    route: "/my/pp/",
+    status: "active",
+    locale: "en-MY",
+    timeZone: "Asia/Kuala_Lumpur",
+    locality: "Pulau Tikus",
+    region: "Penang",
+    coordinates: { latitude: 5.4300, longitude: 100.3050 },
+    languages: ["en", "es", "zh-CN", "ms", "ta"],
+    facilityMap: facilityMapUrl,
+    contentNamespace: "MY_PP",
+    
+    // Local News (Penang specific)
+    localNews: [
+      {
+        id: "buletin-mutiara",
+        name: "Buletin Mutiara (Penang)",
+        description: "Official municipal & local news channel of Penang State.",
+        descriptionI18n: {
+          "en": "Official municipal & local news channel of Penang State.",
+          "es": "Canal oficial de noticias municipales y locales del estado de Penang.",
+          "zh-CN": "槟城州官方市政与本地新闻频道。",
+          "ms": "Saluran berita rasmi perbandaran dan tempatan Negeri Pulau Pinang.",
+          "ta": "பினாங்கு மாநிலத்தின் அதிகாரப்பூர்வ நகராட்சி மற்றும் உள்ளூர் செய்திச் சேனல்.",
+        },
+        youtubeChannelId: "UCkO4-w4aD3p-g3Z1Yn9xU9A",
+        newsUrl: "https://www.buletinmutiara.com/",
+      }
+    ],
+    // TODO: Replace with your actual Cloudflare Worker URL later for the "LIVE" badges
+    liveStatusUrl: "https://live-status.mycelium-community.workers.dev",
+    airQuality: {
+      latitude: 5.4300,
+      longitude: 100.3050,
+      place: "Pulau Tikus, Penang",
+      officialLabel: "Official Air Pollutant Index (DOE Penang)",
+      officialUrl: "https://apims.doe.gov.my/",
+    },
+    contact: {
+      generalPhone: "+60 10-557 0900",
+      address: "Clubhouse Level 1, Pulau Tikus, 10350 George Town, Penang",
+      generalEmail: "myceliumresidence07@gmail.com",
+    }
+  },
+
+  // 2. Malaysia - Johor Bahru
+  MY_JB: {
+    code: "MY_JB",
+    countryCode: "MY",
+    cityCode: "JB",
+    name: "Malaysia",
+    city: "Johor Bahru",
+    displayName: "Johor Bahru, Johor",
+    route: "/my/jb/",
+    status: "active",
+    locale: "en-MY",
+    timeZone: "Asia/Kuala_Lumpur",
+    locality: "Johor Bahru",
+    region: "Johor",
+    coordinates: { latitude: 1.4927, longitude: 103.7414 },
+    languages: ["en", "es", "zh-CN", "ms", "ta"],
+    facilityMap: facilityMapUrl,
+    contentNamespace: "MY_JB",
+    
+    // Local News (Johor specific)
+    localNews: [
+      {
+        id: "berita-rtm",
+        name: "Berita RTM",
+        description: "Public broadcast news with extensive southern regional bulletins.",
+        descriptionI18n: {
+          "en": "Public broadcast news with extensive southern regional bulletins.",
+          "es": "Noticias de la radiodifusión pública con amplios boletines de la región sur.",
+          "zh-CN": "公共广播新闻频道，提供丰富的南部地区新闻简报。",
+          "ms": "Berita penyiaran awam dengan liputan buletin wilayah selatan yang meluas.",
+          "ta": "தென் பிராந்தியத்தின் விரிவான செய்தித் தொகுப்புகளுடன் கூடிய பொதுமக்கள் ஒலிபரப்புச் செய்திகள்.",
+        },
+        youtubeChannelId: "UCjUxj4cyy_F0tVCT8WfmdZQ",
+        newsUrl: "https://berita.rtm.gov.my/",
+      }
+    ],
+    liveStatusUrl: "https://live-status.mycelium-community.workers.dev",
+    airQuality: {
+      latitude: 1.4927,
+      longitude: 103.7414,
+      place: "Johor Bahru, Johor",
+      officialLabel: "Official Air Pollutant Index (DOE Johor)",
+      officialUrl: "https://apims.doe.gov.my/",
+    },
+    contact: {
+      generalPhone: "+60 7-223 8899",
+      address: "Management Office, Jalan Skudai, 80200 Johor Bahru, Johor",
+      generalEmail: "jb.management@mycelium-community.com",
+    }
+  },
+
+  // 3. United States - Portland
+  US_PL: {
+    code: "US_PL",
+    countryCode: "US",
+    cityCode: "PL",
+    name: "United States",
+    city: "Portland",
+    displayName: "Portland, United States",
+    route: "/us/pl/",
+    status: "active",
+    locale: "en-US",
+    timeZone: "America/Los_Angeles",
+    locality: "Portland",
+    region: "Oregon",
+    coordinates: { latitude: 45.5152, longitude: -122.6784 },
+    languages: ["en", "es", "zh-CN", "ms", "ta"],
+    facilityMap: portlandFacilityMapUrl,
+    contentNamespace: "US_PL",
+    
+    // Local News (Oregon specific)
+    localNews: [
+      {
+        id: "kgw",
+        name: "KGW News (Portland)",
+        description: "Portland's leading NBC affiliate for Northwest local coverage.",
+        descriptionI18n: {
+          "en": "Portland's leading NBC affiliate for Northwest local coverage.",
+          "es": "Principal cadena afiliada a NBC en Portland, con cobertura local del noroeste.",
+          "zh-CN": "波特兰主要的 NBC 附属电视台，提供美国西北地区本地新闻。",
+          "ms": "Rangkaian gabungan NBC terkemuka di Portland yang melaporkan berita tempatan wilayah Barat Laut.",
+          "ta": "போர்ட்லாந்தின் முன்னணி NBC இணைப்பு நிலையம்; வடமேற்கு பிராந்திய உள்ளூர் செய்திகளை வழங்குகிறது.",
+        },
+        youtubeChannelId: "UCKgAB8lqTbqbwXC-e6_9lhQ",
+        newsUrl: "https://www.kgw.com/",
+      },
+      {
+        id: "koin6",
+        name: "KOIN 6 News (Portland)",
+        description: "CBS affiliate covering Portland metro and Multnomah County.",
+        descriptionI18n: {
+          "en": "CBS affiliate covering Portland metro and Multnomah County.",
+          "es": "Emisora afiliada a CBS que cubre el área metropolitana de Portland y el condado de Multnomah.",
+          "zh-CN": "CBS 附属电视台，报道波特兰都会区及马特诺马县新闻。",
+          "ms": "Stesen gabungan CBS yang meliputi kawasan metropolitan Portland dan Daerah Multnomah.",
+          "ta": "போர்ட்லாந்து பெருநகரப் பகுதி மற்றும் மல்ட்னோமா கவுண்டி செய்திகளை வழங்கும் CBS இணைப்பு நிலையம்.",
+        },
+        youtubeChannelId: "UC-de9ZOMzlXKcAzDoI8N9gw",
+        newsUrl: "https://www.koin.com/",
+      },
+      {
+        id: "kptv-fox12",
+        name: "FOX 12 Oregon (KPTV)",
+        description: "Top-rated local newscasts and weather across Oregon.",
+        descriptionI18n: {
+          "en": "Top-rated local newscasts and weather across Oregon.",
+          "es": "Informativos locales y pronósticos meteorológicos destacados en todo Oregón.",
+          "zh-CN": "提供俄勒冈州各地的优质本地新闻与天气报道。",
+          "ms": "Siaran berita tempatan dan ramalan cuaca terkemuka di seluruh Oregon.",
+          "ta": "ஒரிகன் மாநிலம் முழுவதும் சிறந்த உள்ளூர் செய்திகளையும் வானிலைத் தகவல்களையும் வழங்குகிறது.",
+        },
+        youtubeChannelId: "UCF16pvJDEUksGYRbfnXne1A",
+        newsUrl: "https://www.kptv.com/",
+      }
+    ],
+    liveStatusUrl: "https://live-status.mycelium-community.workers.dev",
+    airQuality: {
+      latitude: 45.5152,
+      longitude: -122.6784,
+      place: "Portland, Oregon",
+      officialLabel: "Official AQI readings (AirNow Oregon)",
+      officialUrl: "https://www.airnow.gov/",
+    },
+    contact: {
+      generalPhone: "+1 (234) 567-8910",
+      address: "John Smith, 123 Main Street, Portland, OR 97201",
+      generalEmail: "john.smith@company.com",
+      securityDesk24h: "+1 (234) 567-8910",
+    },
+    mapPins: {
+      communityGarden: { x: 11, y: 76 },
+      fitnessCenter: { x: 7.7, y: 69.8 },
+      coWorkingLounge: { x: 52.6, y: 42.8 },
+      bikeHub: { x: 94, y: 42 },
+      evCharging: { x: 58, y: 73 },
+      recyclingCompost: { x: 39.7, y: 86.7 },
+      walkingTrail: { x: 81, y: 47 },
+      clubhouse: { x: 57, y: 51 },
+    },
+  },
+};
+
+// ==========================================================================
+// 4. DYNAMIC MERGER: Assemble Global + National + Local News per site
+// ==========================================================================
+Object.keys(COUNTRY_SITES).forEach(siteCode => {
+  const site = COUNTRY_SITES[siteCode];
+  const countryCode = site.countryCode;
+  
+  // Create the final liveNews array for this specific location
+  site.liveNews = [
+    ...GLOBAL_NEWS,
+    ...(NATIONAL_NEWS[countryCode] || []),
+    ...(site.localNews || [])
+  ];
+  
+  // Clean up the temporary localNews array so it doesn't pollute the object
+  delete site.localNews;
+});
+
+// ==========================================================================
+// 5. HELPER FUNCTION
+// ==========================================================================
+export function getCountrySite(rawCode) {
+  if (!rawCode) return undefined;
+  const code = String(rawCode).trim().toUpperCase();
+
+  // 1. Exact match
+  if (COUNTRY_SITES[code]) return COUNTRY_SITES[code];
+
+  // 2. Legacy fallback for single-country codes
+  if (code === "MY") return COUNTRY_SITES.MY_PP;
+  if (code === "US") return COUNTRY_SITES.US_PL;
+
+  // 3. Fallback for URL paths like /my/pp
+  const normalized = code.replace(/[-/]/g, "_");
+  if (COUNTRY_SITES[normalized]) return COUNTRY_SITES[normalized];
+
+  return undefined;
+}

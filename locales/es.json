@@ -1,0 +1,536 @@
+{
+  "nav": {
+    "announcement": "ANUNCIO",
+    "facilities": "INSTALACIONES",
+    "services": "DIRECTORIO DE SERVICIOS LOCALES",
+    "events": "EVENTOS",
+    "volunteer": "REGISTRO DE VOLUNTARIOS",
+    "faq": "PREGUNTAS FRECUENTES",
+    "searchPlaceholder": "Buscar ....."
+  },
+  "common": {
+    "close": "Cerrar",
+    "submit": "Enviar",
+    "backToTop": "Volver arriba",
+    "readMore": "Leer más",
+    "all": "Todos",
+    "searchNoResult": "No se encontró ninguna sección coincidente, intente con otra palabra clave"
+  },
+  "announcement": {
+    "title": "Anuncios de la comunidad",
+    "subtitle": "Manténgase informado con las últimas noticias y avisos de su comunidad",
+    "tabAll": "Todos",
+    "tabEmergency": "Emergencia",
+    "tabMaintenance": "Mantenimiento",
+    "tabCommunity": "Comunidad",
+    "tabEvents": "Eventos"
+  },
+  "map": {
+    "title": "Mapa de las instalaciones comunitarias",
+    "hint": "Haga clic en un marcador para ver los detalles de la instalación"
+  },
+  "calendar": {
+    "title": "Calendario de eventos comunitarios",
+    "hint": "Haga clic en una fecha resaltada para ver el próximo evento comunitario",
+    "prev": "‹",
+    "next": "›"
+  },
+  "service": {
+    "title": "Directorio de servicios locales",
+    "phone": "Teléfono",
+    "email": "Correo electrónico"
+  },
+  "volunteer": {
+    "kicker": "Participe",
+    "title": "Registro de voluntarios",
+    "subtitle": "Únase a nuestro equipo de voluntarios y genere un impacto positivo en la comunidad",
+    "registerNow": "Registrarse",
+    "formTitle": "Registrarse como voluntario",
+    "close": "Cerrar",
+    "fullName": "Nombre completo",
+    "phone": "Número de teléfono",
+    "address": "Dirección de la casa",
+    "namePlaceholder": "Juan Pérez",
+    "addressPlaceholder": "Calle Elthon 21 22-145",
+    "notesPlaceholder": "p. ej., restricciones dietéticas, necesidades de accesibilidad",
+    "activityLabel": "Actividad:",
+    "notes": "Requisitos / Notas (opcional)",
+    "submitBtn": "Enviar registro",
+    "submitting": "Enviando...",
+    "requiredTip": "Por favor, complete su nombre, número de teléfono y seleccione una actividad.",
+    "successTip": "¡Gracias! Su registro ha sido enviado. Nos pondremos en contacto con usted pronto.",
+    "errorTip": "Error en el envío, compruebe su red e inténtelo de nuevo.",
+    "card1": {
+      "title": "Día de plantación de árboles",
+      "date": "1 de agosto de 2026 · 8:00 a. m. · Parque comunitario",
+      "desc": "Ayude a embellecer nuestro vecindario y a promover la conciencia ambiental plantando árboles alrededor de la comunidad.",
+      "bring": "Qué traer: Guantes de jardinería, una pala pequeña, una botella de agua reutilizable",
+      "btn": "Registrarse"
+    },
+    "card2": {
+      "title": "Día de limpieza del vecindario",
+      "date": "9 de agosto de 2026 · 9:00 a. m. · Estacionamiento para visitantes",
+      "desc": "Únase a una caminata de limpieza alrededor del estanque y el parque para ayudar a mantener nuestra comunidad limpia y verde.",
+      "bring": "Qué traer: Guantes, mascarilla, pinzas (se proporcionan bolsas de basura)",
+      "btn": "Registrarse"
+    },
+    "card3": {
+      "title": "Guía de la carrera solidaria",
+      "date": "22 de agosto de 2026 · 7:00 a. m. · Parque comunitario",
+      "desc": "Apoye a los corredores a lo largo de la ruta como guía, indicando direcciones y entregando refrigerios.",
+      "bring": "Qué traer: Zapatos cómodos, gorra, botella de agua reutilizable",
+      "btn": "Registrarse"
+    }
+  },
+  "faq": {
+    "title": "Preguntas frecuentes"
+  },
+  "chatbot": {
+    "open": "Chat",
+    "title": "Asistente comunitario",
+    "placeholder": "Escriba un mensaje...",
+    "send": "Enviar",
+    "welcome": "Hola. ¿Cómo puedo ayudarle hoy?",
+    "thinking": "Pensando...",
+    "report": "Reportar",
+    "error": "Lo siento, no entiendo muy bien eso. Puede intentar preguntar sobre eventos, instalaciones, servicios o registro de voluntarios.",
+    "thankFeedback": "Gracias por sus comentarios",
+    "quickReply": {
+      "announcement": "Anuncios",
+      "facilities": "Instalaciones",
+      "services": "Servicios",
+      "events": "Eventos",
+      "volunteer": "Voluntariado",
+      "faq": "Preguntas frecuentes"
+    },
+    "replies": {
+      "announcement": "Últimos anuncios de la comunidad:\n\n• 30 de julio - Advertencia de fuertes lluvias (2 p. m. - 8 p. m.)\n• 24 de ago. - Interrupción del suministro de agua (9 a. m. - 4 p. m.)\n• 15 de ago. - Reunión anual de la comunidad\n\nAbra la página de Anuncios para ver todas las categorías y los detalles completos.",
+      "greeting": "¡Hola! ¿Cómo puedo ayudarle hoy? Puede preguntarme sobre eventos, instalaciones, servicios, registro de voluntarios o preguntas frecuentes.",
+      "events": "Próximos eventos comunitarios:\n\n• 1 de ago. - Día de plantación de árboles\n• 9 de ago. - Día de limpieza del vecindario\n• 22 de ago. - Carrera solidaria\n\nAbra la página del Calendario de eventos para ver los detalles completos y la información de registro.",
+      "volunteer": "Puede inscribirse en la página de Registro de voluntarios. Actualmente tenemos 3 actividades: Día de plantación de árboles, limpieza del vecindario y guía de la carrera solidaria. Haga clic en 'SER VOLUNTARIO' en la diapositiva de voluntarios para rellenar el formulario.",
+      "facilities": "Abra el Mapa interactivo de instalaciones para ver todas las comodidades. Marca 11 ubicaciones, incluido el gimnasio, la piscina, el área de juegos infantiles y la casa club. También puede buscar instalaciones específicas en la barra de búsqueda superior.",
+      "faq": "Visite la sección de Preguntas frecuentes para obtener respuestas sobre membresías, reserva de instalaciones, normas comunitarias y reportes de mantenimiento. También puede usar la barra de búsqueda para encontrar contenido rápidamente.",
+      "services": "El Directorio de servicios locales tiene contactos para 8 tipos de servicios locales de confianza, incluidos fontaneros, electricistas y técnicos de aire acondicionado. Abra el directorio para ver los números de teléfono y correos electrónicos.",
+      "thank": "¡De nada! No dude en preguntar si tiene alguna otra duda.",
+      "contact": "Puede comunicarse con la oficina de administración de la comunidad al +60 10-557 0900 o enviar un correo electrónico a myceliumresidence07@gmail.com. El horario de oficina es de 9 a. m. a 6 p. m. en días laborables."
+    }
+  },
+  "report": {
+    "title": "Enviar comentarios",
+    "name": "Nombre",
+    "surname": "Apellido",
+    "contactNumber": "Número de contacto",
+    "email": "Correo electrónico",
+    "address": "Tu dirección",
+    "message": "Escribe tu mensaje",
+    "subscribe": "Me gustaría recibir novedades sobre campañas.",
+    "submit": "Enviar",
+    "successAlert": "¡Gracias por tus comentarios! Hemos recibido tu reporte y responderemos en un plazo de 48 horas.",
+    "errorAlert": "Lo sentimos, ha ocurrido un error al enviar tus comentarios. Inténtalo de nuevo o escríbenos directamente.",
+    "submitting": "Enviando..."
+  },
+  "slider": {
+    "announcement": {
+      "title": "ANUNCIO",
+      "desc": "Mantente informado con las últimas noticias y avisos de tu comunidad",
+      "btn": "LEER AVISO"
+    },
+    "facilities": {
+      "title": "INSTALACIONES",
+      "desc": "Explora las instalaciones de la comunidad, incluyendo el gimnasio, el área de juegos, la piscina y más",
+      "btn": "VER MAPA"
+    },
+    "services": {
+      "title": "DIRECTORIO DE SERVICIOS LOCALES",
+      "desc": "Encuentra servicios locales de confianza como fontaneros, electricistas, limpiadores y técnicos",
+      "btn": "BUSCAR CONTACTO"
+    },
+    "events": {
+      "title": "EVENTOS",
+      "desc": "Descubre los próximos eventos comunitarios, actividades y celebraciones cerca de ti",
+      "btn": "VER CALENDARIO"
+    },
+    "volunteer": {
+      "title": "REGISTRO DE VOLUNTARIOS",
+      "desc": "Únete a nuestro equipo de voluntarios y genera un impacto positivo en la comunidad",
+      "btn": "SER VOLUNTARIO"
+    },
+    "faq": {
+      "title": "PREGUNTAS FRECUENTES",
+      "desc": "Encuentra respuestas rápidas a las preguntas frecuentes sobre los servicios e instalaciones de la comunidad",
+      "btn": "VER PREGUNTAS"
+    }
+  },
+  "mapPins": {
+    "tennis": {
+      "name": "Pista de tenis",
+      "desc": "Una pista de tenis cerca de la entrada principal, al lado de la hilera de casas frontales."
+    },
+    "clubhouse": {
+      "name": "Casa club",
+      "desc": "El edificio principal de la comunidad, junto a la zona de la piscina y el césped abierto cerca del centro del vecindario."
+    },
+    "pool": {
+      "name": "Piscina principal",
+      "desc": "La piscina central de la comunidad con solárium, tumbonas y sombrillas, justo al lado de la casa club."
+    },
+    "playground": {
+      "name": "Área de juegos",
+      "desc": "Una zona de juegos de arena con toboganes, justo detrás de la casa club."
+    },
+    "park": {
+      "name": "Parque comunitario",
+      "desc": "Un césped verde abierto con un sendero para caminar en circuito, en el lado este de la propiedad."
+    },
+    "parking": {
+      "name": "Estacionamiento para visitas",
+      "desc": "Un estacionamiento señalizado para residentes y visitantes, justo al sur de la casa club."
+    },
+    "basketball": {
+      "name": "Cancha de baloncesto",
+      "desc": "Una cancha de baloncesto cerca de las casas de la esquina suroeste."
+    },
+    "gym": {
+      "name": "Gimnasio",
+      "desc": "La casa de tejado gris al lado de la cancha de baloncesto, utilizada como gimnasio de la comunidad."
+    },
+    "pond": {
+      "name": "Estanque",
+      "desc": "Un estanque natural a lo largo del borde sureste de la comunidad, rodeado de árboles."
+    },
+    "recycle1": {
+      "name": "Punto de reciclaje",
+      "desc": "Punto de reciclaje cerca del estacionamiento para visitas."
+    },
+    "recycle2": {
+      "name": "Punto de reciclaje",
+      "desc": "Punto de reciclaje cerca de la hilera inferior de casas."
+    }
+  },
+  "features": {
+    "tooltip": "HAZ CLIC PARA LEER MÁS",
+    "smart": {
+      "title": "INSTALACIONES INTELIGENTES",
+      "desc": "Accede a instalaciones y servicios modernos diseñados para mejorar la vida comunitaria diaria.",
+      "modal": {
+        "title": "Instalaciones inteligentes",
+        "items": {
+          "digitalPayments": "Pagos digitales",
+          "facilityBooking": "Reserva de instalaciones",
+          "procurement": "Adquisiciones",
+          "eform": "Formulario digital"
+        }
+      }
+    },
+    "safety": {
+      "title": "SEGURIDAD COMUNITARIA",
+      "desc": "Creando un vecindario más seguro y conectado.",
+      "modal": {
+        "title": "Seguridad comunitaria",
+        "items": {
+          "contractManagement": "Gestión de contratos",
+          "visitorManagement": "Gestión de visitantes",
+          "videoAnalytics": "Analítica de vídeo",
+          "virtualPatrol": "Patrulla virtual"
+        }
+      }
+    },
+    "green": {
+      "title": "VIDA ECOLÓGICA",
+      "desc": "Promoviendo un entorno limpio, saludable y sostenible.",
+      "modal": {
+        "title": "Vida ecológica",
+        "items": {
+          "smartIrrigation": "Riego inteligente",
+          "wasteManagement": "Gestión de residuos",
+          "evCharging": "Carga para vehículos eléctricos",
+          "energyEfficiency": "Eficiencia energética"
+        }
+      }
+    },
+    "connect": {
+      "title": "CONÉCTATE CON NOSOTROS",
+      "desc": "Comparte ideas, opiniones y mantente conectado con la comunidad.",
+      "tooltip": "HAZ CLIC PARA CONTACTAR"
+    }
+  },
+  "footer": {
+    "tagline": "POTENCIANDO EL BIENESTAR\nENRIQUECIENDO VIDAS",
+    "desc": "Construyendo una comunidad más inteligente, ecológica y conectada para todos los residentes.",
+    "quickLinks": "Enlaces rápidos",
+    "linkAnnouncement": "Anuncios",
+    "linkMap": "Mapa de instalaciones",
+    "linkService": "Directorio de servicios",
+    "linkEvent": "Calendario de eventos",
+    "linkVolunteer": "Voluntariado",
+    "linkFaq": "Preguntas frecuentes",
+    "contactTitle": "Contáctanos",
+    "contactAddr": "📍 Oficina de administración, Planta 1 de la Casa Club",
+    "contactPhone": "📞 +6010-5570900",
+    "contactEmail": "✉ myceliumresidence07@gmail.com",
+    "contactHour": "🕘 Lun – Vie: 9:00 AM – 6:00 PM",
+    "newsletterTitle": "Boletín",
+    "newsletterDesc": "Suscríbete para recibir actualizaciones semanales de la comunidad y avisos de eventos.",
+    "newsletterBtn": "Suscribirse",
+    "newsletterPlaceholder": "Introduce tu correo electrónico",
+    "copyright": "© 2026 MYCELIUM Smart Community. Todos los derechos reservados.",
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "rules": "Normas de la comunidad"
+  },
+  "legalDocs": {
+    "privacy": {
+      "title": "Política de Privacidad",
+      "content": "\n          <h4>1. Información que recopilamos</h4>\n          <p>Podemos recopilar información personal que usted proporcione voluntariamente, incluidos su nombre, número de contacto, dirección de correo electrónico y dirección de su casa cuando envía comentarios, se registra para actividades de voluntariado o utiliza los servicios de la comunidad.</p>\n          <h4>2. Cómo usamos su información</h4>\n          <ul>\n            <li>Para proporcionar y mantener los servicios e instalaciones de la comunidad</li>\n            <li>Para enviar anuncios importantes, notificaciones de eventos y actualizaciones de servicios</li>\n            <li>Para responder a sus consultas y comentarios</li>\n            <li>Para mejorar la gestión de la comunidad y la experiencia del usuario</li>\n          </ul>\n          <h4>3. Compartir información</h4>\n          <p>No vendemos, alquilamos ni revelamos su información personal a terceros con fines comerciales.</p>\n          <h4>4. Seguridad de los datos</h4>\n          <p>Adoptamos las medidas técnicas y organizativas adecuadas para proteger su información personal.</p>\n          <h4>5. Sus derechos</h4>\n          <p>Usted tiene derecho a acceder, corregir o solicitar la eliminación de su información personal.</p>\n          <h4>6. Contáctenos</h4>\n          <p>Si tiene alguna pregunta, comuníquese a myceliumresidence07@gmail.com.</p>\n        "
+    },
+    "terms": {
+      "title": "Términos de Servicio",
+      "content": "\n          <h4>1. Aceptación de los términos</h4>\n          <p>Al acceder y utilizar los servicios de la comunidad inteligente MYCELIUM, usted acepta estar sujeto a estos Términos de Servicio.</p>\n          <h4>2. Descripción del servicio</h4>\n          <p>Proporcionamos información de la comunidad, reserva de instalaciones y servicios en línea.</p>\n          <h4>3. Obligaciones del usuario</h4>\n          <ul>\n            <li>Cumplir con las leyes aplicables y las normas de la comunidad</li>\n            <li>Proporcionar información verdadera y precisa</li>\n          </ul>\n        "
+    },
+    "rules": {
+      "title": "Reglas de la Comunidad",
+      "content": "\n          <h4>1. Etiqueta en áreas públicas</h4>\n          <p>Mantenga las áreas públicas limpias y ordenadas. Cuide bien de las instalaciones públicas.</p>\n          <h4>2. Horas de silencio</h4>\n          <p>Las horas de silencio son de 10:00 PM a 7:00 AM todos los días.</p>\n          <h4>3. Gestión de mascotas</h4>\n          <p>Las mascotas deben mantenerse con correa en las áreas públicas.</p>\n        "
+    }
+  },
+  "searchKeywords": [
+    {
+      "keywords": [
+        "anuncio",
+        "anuncios",
+        "noticias",
+        "aviso",
+        "actualización",
+        "emergencia",
+        "mantenimiento",
+        "lluvia",
+        "suministro de agua"
+      ],
+      "action": "announcement",
+      "slideIndex": 0
+    },
+    {
+      "keywords": [
+        "instalación",
+        "instalaciones",
+        "mapa",
+        "gimnasio",
+        "piscina",
+        "nadar",
+        "patio de recreo",
+        "parque",
+        "tenis",
+        "baloncesto",
+        "casa club",
+        "estacionamiento",
+        "estanque",
+        "reciclaje",
+        "plano del sitio"
+      ],
+      "action": "map",
+      "slideIndex": 1
+    },
+    {
+      "keywords": [
+        "servicio",
+        "directorio",
+        "plomero",
+        "electricista",
+        "limpiador",
+        "reparación",
+        "aire acondicionado",
+        "carpintero",
+        "pintor",
+        "jardinero",
+        "doctor",
+        "contacto"
+      ],
+      "action": "service",
+      "slideIndex": 2
+    },
+    {
+      "keywords": [
+        "evento",
+        "calendario",
+        "actividad",
+        "plantación de árboles",
+        "limpieza",
+        "carrera",
+        "celebración",
+        "julio",
+        "agosto"
+      ],
+      "action": "calendar",
+      "slideIndex": 3
+    },
+    {
+      "keywords": [
+        "voluntario",
+        "registrarse",
+        "unirse",
+        "inscribirse",
+        "ayuda",
+        "organizador"
+      ],
+      "action": "volunteer",
+      "slideIndex": 4
+    },
+    {
+      "keywords": [
+        "preguntas frecuentes",
+        "pregunta",
+        "respuesta",
+        "cómo hacer",
+        "regla",
+        "membresía",
+        "informe",
+        "problema",
+        "seguridad",
+        "horas de silencio",
+        "mascota",
+        "estacionamiento",
+        "boletín"
+      ],
+      "action": "faq",
+      "slideIndex": 5
+    }
+  ],
+  "heroIntro": {
+    "titleLine1": "Vida inteligente,",
+    "titleLine2": "arraigada en la naturaleza.",
+    "description": "Una comunidad residencial privada diseñada para el bienestar, la seguridad y la conexión.",
+    "explore": "EXPLORA LA COMUNIDAD",
+    "chooseLocation": "ELIGE TU UBICACIÓN"
+  },
+  "newsletter": {
+    "invalidEmail": "Por favor, introduce una dirección de correo electrónico válida.",
+    "submitting": "Enviando...",
+    "success": "¡Suscripción exitosa! Gracias por suscribirte.",
+    "failure": "La suscripción falló, por favor inténtalo de nuevo más tarde."
+  },
+  "gallery": {
+    "kicker": "Galería",
+    "title": "Momentos que vale la pena recordar",
+    "sub": "Una secuencia de momentos de la comunidad: deslízate por cada fotograma.",
+    "enter": "Entrar a la galería",
+    "entering": "Entrando…",
+    "close": "Cerrar historia",
+    "newer": "Más reciente",
+    "older": "Más antiguo",
+    "when": "Cuándo",
+    "where": "Dónde",
+    "host": "Organizado por",
+    "people": "Acompañado por",
+    "photo": "Espacio para foto",
+    "by": "Escritorio de la Comunidad MYCELIUM",
+    "explore": "Explorar",
+    "back": "Volver",
+    "empty": "Aún no hay momentos",
+    "date": "Fecha",
+    "place": "Lugar"
+  },
+  "liveNews": {
+    "kicker": "Noticias en directo",
+    "title": "Noticias locales, en directo",
+    "sub": "Mira canales de noticias para tu región sin salir del sitio de la comunidad.",
+    "play": "Reproducir en directo",
+    "resume": "Reanudar directo",
+    "loadsOnPlay": "El video se carga solo cuando presionas reproducir.",
+    "paused": "En pausa para ahorrar datos mientras estabas fuera.",
+    "note": "Si el video aparece como no disponible, el canal está entre transmisiones o ha deshabilitado la inserción.",
+    "open": "Abrir en YouTube",
+    "channels": "Canales de noticias",
+    "credit": "El video es proporcionado por YouTube y el propietario del canal.",
+    "live": "En directo",
+    "offline": "Fuera de línea",
+    "readNews": "¿No se reproduce? Lee las últimas noticias",
+    "notLiveTitle": "No está en directo en este momento",
+    "notLiveBody": "{name} no está transmitiendo en este momento. ¿Abrir su página de últimas noticias en su lugar?",
+    "openNews": "Abrir últimas noticias",
+    "tryAnyway": "Intentar con el reproductor de todos modos",
+    "stay": "Quedarse aquí"
+  },
+  "airQuality": {
+    "kicker": "Calidad del aire",
+    "title": "Calidad del aire hoy",
+    "sub": "Índice AQI de EE. UU. estimado para la zona de su comunidad, actualizado durante todo el día.",
+    "loading": "Cargando calidad del aire…",
+    "error": "Los datos de calidad del aire no están disponibles en este momento.",
+    "retry": "Intentar de nuevo",
+    "aqi": "AQI de EE. UU.",
+    "updated": "Actualizado",
+    "trend": "Últimas 24 horas y próximas 12 horas",
+    "now": "Ahora",
+    "pollutants": "Principales contaminantes",
+    "official": "Lecturas oficiales",
+    "source": "Estimación modelada a partir de los datos del Servicio de Vigilancia Atmosférica de Copernicus a través de Open-Meteo. No es una lectura oficial de una estación de monitoreo.",
+    "good": "Buena",
+    "moderate": "Moderada",
+    "sensitive": "Insalubre para grupos sensibles",
+    "unhealthy": "Insalubre",
+    "veryUnhealthy": "Muy insalubre",
+    "hazardous": "Peligrosa",
+    "adviceGood": "La calidad del aire es satisfactoria. Es un buen momento para estar al aire libre.",
+    "adviceModerate": "Aceptable para la mayoría de las personas. Las personas con sensibilidad inusual pueden querer tomar precauciones al aire libre.",
+    "adviceSensitive": "Los niños, los adultos mayores y las personas con afecciones cardíacas o pulmonares deben limitar el esfuerzo prolongado al aire libre.",
+    "adviceUnhealthy": "Todos deben reducir el esfuerzo prolongado al aire libre. Los grupos sensibles deben permanecer en interiores siempre que sea posible.",
+    "adviceVeryUnhealthy": "Evite las actividades al aire libre siempre que pueda. Mantenga las ventanas cerradas.",
+    "adviceHazardous": "Permanezca en interiores con las ventanas cerradas y siga las indicaciones de las autoridades locales."
+  },
+  "featureDetails": {
+    "smartFacilitiesModal": [
+      "Pague los gastos de la comunidad y las tarifas de las instalaciones a través de un flujo digital claro y conveniente. Los residentes pueden revisar lo que deben y conservar un registro de los pagos realizados. Esta versión de exposición utiliza un pago de prueba (sandbox), por lo que no se cobra dinero real.",
+      "Consulte la disponibilidad y reserve espacios compartidos como el gimnasio, la piscina o el salón comunal. Un calendario de reservas ayuda a los residentes a planificar con anticipación y evitar duplicidades.",
+      "Envíe solicitudes de suministros compartidos o trabajos de mantenimiento y siga cada solicitud desde su presentación hasta su finalización, ayudando a la administración a mantener las decisiones transparentes.",
+      "Envíe formularios como solicitudes de mantenimiento y solicitudes de residentes en línea, y luego reciba una confirmación clara para reducir el papeleo y las llamadas de seguimiento."
+    ],
+    "communitySafetyModal": [
+      "Mantenga los acuerdos de servicio, las fechas de renovación y los documentos relacionados organizados en un solo lugar, para que los residentes y la administración puedan entender lo acordado.",
+      "Registre a los invitados esperados e informe a los residentes cuando llegue un visitante. Unos pasos de registro claros ayudan a que la entrada sea más fluida sin perder un trato humano y acogedor.",
+      "Utilice sistemas de cámaras en áreas compartidas para ayudar al equipo de administración a revisar incidentes de seguridad. La supervisión debe cumplir con las normas de privacidad locales y las políticas publicadas de la comunidad.",
+      "Coordine las rutas de patrullaje y registre las observaciones para que el equipo pueda responder de manera coherente a las preocupaciones en torno a entradas, senderos e instalaciones compartidas."
+    ],
+    "greenLivingModal": [
+      "Ajuste los programas de riego según el clima y las necesidades de las plantas, ayudando a que los jardines se mantengan saludables y reduciendo el consumo de agua evitable.",
+      "Haga que el reciclaje y el compostaje sean más fáciles de entender con pautas de clasificación claras y puntos de recolección que los residentes pueden encontrar en toda la comunidad.",
+      "Proporcione puntos de carga para vehículos eléctricos y muestre a los residentes dónde se encuentran, apoyando los viajes de menores emisiones a medida que crece la comunidad.",
+      "Realice un seguimiento de medidas prácticas como la iluminación eficiente y los horarios de los equipos para reducir el desperdicio de energía en los espacios compartidos sin comprometer el confort."
+    ],
+    "communityConnectModal": [
+      "Lea los avisos actuales de su comunidad seleccionada, incluidas las actualizaciones de servicios y la información de interés urgente.",
+      "Explore el calendario de la comunidad para ver las próximas actividades, fechas e información práctica de eventos.",
+      "Encuentre oportunidades de voluntariado, lea en qué consiste cada actividad e inscríbase para participar.",
+      "Póngase en contacto con el equipo de administración local utilizando la información de contacto de la región seleccionada actualmente en el sitio web."
+    ],
+    "ui": {
+      "soon": "Próximamente",
+      "soonNote": "Próximamente: este servicio está planeado y aún no está disponible.",
+      "openPortal": "Abrir en el portal de residentes →",
+      "viewCalendar": "Ver el calendario de la comunidad →",
+      "exploreVolunteer": "Explorar actividades de voluntariado →",
+      "seeContacts": "Ver contactos de la comunidad →",
+      "readNotices": "Leer avisos de la comunidad →",
+      "sendMessage": "Enviar un mensaje →",
+      "communityFeature": "Característica de la comunidad"
+    }
+  },
+  "countryPicker": {
+    "kicker": "UBICACIONES DE MYCELIUM",
+    "title": "Elija su comunidad.",
+    "selected": "SELECCIONADA",
+    "active": "Sitio de la comunidad disponible",
+    "button": "Continuar a Mycelium",
+    "help": "La elección de su ubicación se guarda en este dispositivo. Puede cambiarla en cualquier momento.",
+    "close": "Cerrar selector de ubicación",
+    "heroLabel": "ELIJA SU UBICACIÓN",
+    "navLabel": "UBICACIÓN DE MYCELIUM",
+    "globeLoading": [
+      "Cargando el globo terráqueo…",
+      "Aún cargando; ya puede elegir una ubicación a continuación."
+    ]
+  },
+  "footerActions": {
+    "placeholder": "Correo electrónico para suscribirse, o escriba su mensaje",
+    "report": "Escribir un informe →",
+    "hint": "Introduzca un correo electrónico para unirse al boletín. Escriba cualquier otra cosa y abriremos el formulario de reporte para que pueda enviarlo al equipo de administración."
+  }
+}
