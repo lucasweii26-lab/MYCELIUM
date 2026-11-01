@@ -33,6 +33,12 @@ const copyClassicScripts = {
     if (existsSync(facilityPhotos)) {
       cpSync(facilityPhotos, path.join(outputDirectory, "img/Facilities"), { recursive: true });
     }
+    // Volunteer card videos are chosen at runtime (/img/volunteer/<name>.mp4), so Vite cannot see them.
+    const volunteerVideos = path.resolve(projectRoot, "img/volunteer");
+    if (existsSync(volunteerVideos)) {
+      cpSync(volunteerVideos, path.join(outputDirectory, "img/volunteer"), { recursive: true });
+    }
+
     // Hero sequences and language packs are fetched at runtime, so Vite cannot see them.
     // (hero-depth is gone: the depth effect was removed.)
     for (const directoryName of ["hero-frames", "hero-frames-large", "hero-wire", "locales"]) {

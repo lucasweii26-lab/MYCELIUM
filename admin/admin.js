@@ -420,8 +420,8 @@ function loadVolunteerCardEditor(user) {
         </div>
         <h3>Video</h3>
         <div class="field image-field"><label for="vol-videoUrl">Card video</label>
-          <div class="image-row"><input id="vol-videoUrl" name="videoUrl" type="text" inputmode="url" list="volunteerVideoChoices" placeholder="./img/volunteer/tree.mp4 or https://…" autocomplete="off"></div>
-          <datalist id="volunteerVideoChoices">${["tree", "clean", "run", "garden", "food", "book", "wellness"].map((name) => `<option value="./img/volunteer/${name}.mp4"></option>`).join("")}</datalist>
+          <div class="image-row"><input id="vol-videoUrl" name="videoUrl" type="text" inputmode="url" list="volunteerVideoChoices" placeholder="/img/volunteer/tree.mp4 or https://…" autocomplete="off"></div>
+          <datalist id="volunteerVideoChoices">${["tree", "clean", "run", "garden", "food", "book", "wellness"].map((name) => `<option value="/img/volunteer/${name}.mp4"></option>`).join("")}</datalist>
           <div class="image-preview" id="volunteerVideoPreview" hidden><video muted playsinline controls preload="metadata" style="max-width:320px;width:100%"></video><button class="table-action" type="button" id="volunteerVideoClear">Remove</button></div>
           <small class="muted">To use a new video, add the MP4 file to the project folder <code>img/volunteer/</code>, deploy, then type its path here (for example <code>./img/volunteer/beach.mp4</code>). A full https:// link to a video hosted elsewhere also works. Short, silent loops (under about 8 MB) work best. Leave empty to use the website’s built-in video that best matches the title.</small></div>
         <h3>Text by language</h3>${volunteerLangTabs()}

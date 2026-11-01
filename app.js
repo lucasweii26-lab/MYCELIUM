@@ -1905,8 +1905,7 @@ function initApp() {
     }
   });
 
-  // 同一文件夹 ./img/volunteer/ 下的视频；按卡片文案语义匹配，Firestore 可写 videoUrl 覆盖
-  const VOLUNTEER_VIDEO_DIR = "./img/volunteer/";
+  const VOLUNTEER_VIDEO_DIR = "/img/volunteer/";
   const VOLUNTEER_VIDEO_FALLBACK = [
     `${VOLUNTEER_VIDEO_DIR}tree.mp4`,
     `${VOLUNTEER_VIDEO_DIR}clean.mp4`,
@@ -1917,6 +1916,7 @@ function initApp() {
     if (!event) return VOLUNTEER_VIDEO_FALLBACK[index % VOLUNTEER_VIDEO_FALLBACK.length];
     const explicit = event.videoUrl || event.video || event.mediaUrl || "";
     if (explicit) return explicit;
+    if (explicit) return String(explicit).trim().replace(/^\.\//, "/"); // "./img/x.mp4" saved earlier -> "/img/x.mp4"
 
     const hay = [
       event.title_en, event.title_es, event["title_zh-CN"], event.title_ms, event.title_ta,

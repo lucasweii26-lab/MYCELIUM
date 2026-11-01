@@ -2193,4 +2193,55 @@ nav#nav.is-shrunk .country-switcher-value::after { content: attr(data-short); fo
   #volunteer .vi-card { width: 100%; }
 }
 
+/* ========================================================================== 
+   MYCELIUM visual alignment refinement — shared rail at every breakpoint.
+   This pass changes layout edges only; it does not alter scroll, motion,
+   card physics, Gallery spring behaviour, or Hero anchoring.
+   ========================================================================== */
+
+/* Volunteer cards use the exact same outside gutter as their section heading. */
+#volunteer .vi-item.volunteerCard {
+  padding-left: var(--site-page-gutter);
+  padding-right: var(--site-page-gutter);
+}
+
+#volunteer .vi-card {
+  width: min(var(--site-content-max), 100%);
+  max-width: var(--site-content-max);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* Announcement overlay owns vertical rhythm; its content aligns to the shared rail. */
+.announcement-overlay {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.announcement {
+  width: min(var(--site-content-max), calc(100% - var(--site-page-gutter) - var(--site-page-gutter)));
+  max-width: var(--site-content-max) !important;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 0;
+  box-sizing: border-box;
+}
+
+/* Footer inner columns and legal row align with the same rail as the main sections. */
+.footer {
+  padding-left: var(--site-page-gutter);
+  padding-right: var(--site-page-gutter);
+}
+
+.footer-container,
+.footer-bottom {
+  width: min(var(--site-content-max), 100%);
+  max-width: var(--site-content-max);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
 
